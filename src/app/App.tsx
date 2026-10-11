@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { BottomNav, type NavigationSection } from '../components/BottomNav'
-import { Mascot } from '../components/Mascot'
 import { Onboarding } from '../components/Onboarding'
 import { loadAppData, saveAppData } from '../data/storage'
+import { TimerScreen } from '../features/timer/TimerScreen'
+import { usePomodoroController } from '../features/timer/usePomodoroController'
 import { useTranslation } from '../i18n/useTranslation'
 
 export function App() {
   const [appData, setAppData] = useState(() => loadAppData(localStorage))
+  const timerController = usePomodoroController({ appData, onAppDataChange: setAppData })
   const [activeSection, setActiveSection] = useState<NavigationSection>('timer')
-  const { t } = useTranslation(appData.settings.locale)
+  const effectiveLocale = appData.settings.locale
+  const { t } = useTranslation(effectiveLocale)
 
   function completeOnboarding(name: string) {
     const nextAppData = {
@@ -40,7 +43,7 @@ export function App() {
         {activeSection === 'timer' && (
           <section className="app-section app-section--timer" aria-labelledby="timer-section-title">
             <h1 id="timer-section-title">{t('navigation.timer')}</h1>
-            <Mascot active={false} animationsEnabled={appData.settings.animationsEnabled} />
+            <TimerScreen controller={timerController} />
           </section>
         )}
 
@@ -57,7 +60,7 @@ export function App() {
         )}
       </div>
 
-      <BottomNav active={activeSection} onChange={setActiveSection} />
+      <BottomNav active={activeSection} locale={effectiveLocale} onChange={setActiveSection} />
     </main>
   )
 }

@@ -14,7 +14,7 @@ test('changes to the selected navigation section', async () => {
   const onChange = vi.fn()
   const user = userEvent.setup()
 
-  render(<BottomNav active="timer" onChange={onChange} />)
+  render(<BottomNav active="timer" locale="ru" onChange={onChange} />)
   await user.click(screen.getByRole('button', { name: 'Статистика' }))
 
   expect(onChange).toHaveBeenCalledWith('stats')

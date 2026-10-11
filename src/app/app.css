@@ -161,6 +161,82 @@ input:focus-visible {
   justify-self: center;
 }
 
+.timer-screen {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  min-height: 0;
+  height: 100%;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.timer-screen__status {
+  text-align: center;
+}
+
+.timer-screen__status p {
+  margin: 0;
+  color: var(--color-terracotta);
+  font-weight: 700;
+}
+
+.timer-screen__status output {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(3rem, 18vw, 6rem);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.timer-screen__task {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.timer-screen__task input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-dark-blue);
+  background: var(--color-surface);
+}
+
+.timer-screen__mascot {
+  display: grid;
+  min-height: 0;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.timer-screen__mascot p {
+  margin: 0;
+  color: var(--color-terracotta);
+  font-size: 0.875rem;
+}
+
+.timer-screen__finish {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-dark-blue);
+  background: var(--color-surface);
+  font-weight: 700;
+}
+
+.timer-screen__primary {
+  width: 100%;
+  border-radius: 16px;
+  color: var(--color-surface);
+  background: var(--color-terracotta);
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
 .app-section--scroll {
   height: 100%;
   overflow: auto;

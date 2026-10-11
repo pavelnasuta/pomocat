@@ -1,13 +1,13 @@
-import { loadAppData } from '../data/storage'
+import type { Locale } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
 
 interface MascotProps {
   active: boolean
   animationsEnabled: boolean
+  locale: Locale
 }
 
-export function Mascot({ active, animationsEnabled }: MascotProps) {
-  const locale = loadAppData(localStorage).settings.locale
+export function Mascot({ active, animationsEnabled, locale }: MascotProps) {
   const { t } = useTranslation(locale)
   const isAnimated = active && animationsEnabled
 

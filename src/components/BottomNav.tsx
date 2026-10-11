@@ -1,17 +1,17 @@
-import { loadAppData } from '../data/storage'
+import type { Locale } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
 
 export type NavigationSection = 'timer' | 'stats' | 'settings'
 
 interface BottomNavProps {
   active: NavigationSection
+  locale: Locale
   onChange(section: NavigationSection): void
 }
 
 const navigationSections: NavigationSection[] = ['timer', 'stats', 'settings']
 
-export function BottomNav({ active, onChange }: BottomNavProps) {
-  const locale = loadAppData(localStorage).settings.locale
+export function BottomNav({ active, locale, onChange }: BottomNavProps) {
   const { t } = useTranslation(locale)
 
   return (
