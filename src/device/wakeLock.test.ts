@@ -42,6 +42,29 @@ test('releases an acquired Wake Lock', async () => {
   expect(sentinel.release).toHaveBeenCalledOnce()
 })
 
+test('coalesces concurrent acquisition and releases a sentinel that resolves after release', async () => {
+  let resolveRequest!: (sentinel: { addEventListener: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> }) => void
+  const pendingRequest = new Promise<{ addEventListener: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> }>((resolve) => {
+    resolveRequest = resolve
+  })
+  const request = vi.fn().mockReturnValue(pendingRequest)
+  const sentinel = { addEventListener: vi.fn(), release: vi.fn().mockResolvedValue(undefined) }
+  const controller = new WakeLockController({
+    navigator: { wakeLock: { request } } as unknown as Navigator,
+    document,
+  })
+
+  const firstAcquire = controller.acquire()
+  const secondAcquire = controller.reacquireWhenVisible()
+  const release = controller.release()
+  resolveRequest(sentinel)
+
+  await Promise.all([firstAcquire, secondAcquire, release])
+
+  expect(request).toHaveBeenCalledOnce()
+  expect(sentinel.release).toHaveBeenCalledOnce()
+})
+
 test('reacquires after the browser releases the active Wake Lock', async () => {
   let onRelease: (() => void) | undefined
   const sentinel = {

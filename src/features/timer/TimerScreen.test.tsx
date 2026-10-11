@@ -1,11 +1,14 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { PomodoroController } from './usePomodoroController'
 import { TimerScreen } from './TimerScreen'
 
-function controllerFor(phase: PomodoroController['view']['phase'] = 'focus'): PomodoroController {
+function controllerFor(
+  phase: PomodoroController['view']['phase'] = 'focus',
+  locale: PomodoroController['locale'] = 'ru',
+): PomodoroController {
   return {
-    locale: 'ru',
+    locale,
     animationsEnabled: true,
     view: {
       phase,
@@ -42,4 +45,28 @@ test('keeps the mascot calm during an active break', () => {
   render(<TimerScreen controller={controllerFor('shortBreak')} />)
 
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-animated', 'false')
+})
+
+test('renders English paused controls and forwards task edits', async () => {
+  const controller = controllerFor('paused', 'en')
+  const user = userEvent.setup()
+
+  render(<TimerScreen controller={controller} />)
+
+  const task = screen.getByLabelText('Task')
+  fireEvent.change(task, { target: { value: 'Science' } })
+  await user.click(screen.getByRole('button', { name: 'Resume' }))
+
+  expect(controller.setTaskName).toHaveBeenLastCalledWith('Science')
+  expect(controller.resume).toHaveBeenCalledOnce()
+})
+
+test('renders the English finish control for an active phase', async () => {
+  const controller = controllerFor('focus', 'en')
+  const user = userEvent.setup()
+
+  render(<TimerScreen controller={controller} />)
+  await user.click(screen.getByRole('button', { name: 'Finish phase' }))
+
+  expect(controller.finishCurrentPhase).toHaveBeenCalledOnce()
 })

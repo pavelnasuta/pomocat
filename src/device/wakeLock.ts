@@ -12,10 +12,11 @@ type WakeLockNavigator = Navigator & {
 export class WakeLockController {
   private sentinel?: WakeLockSentinel
   private wantsWakeLock = false
+  private acquisition?: Promise<'active' | 'unavailable'>
 
   constructor(private readonly environment: { navigator: Navigator; document: Document }) {
     environment.document.addEventListener('visibilitychange', () => {
-      if (this.wantsWakeLock) {
+      if (this.wantsWakeLock && environment.document.visibilityState === 'visible') {
         void this.reacquireWhenVisible()
       }
     })
@@ -33,18 +34,35 @@ export class WakeLockController {
       return 'active'
     }
 
-    try {
-      const sentinel = await wakeLock.request('screen')
-      this.sentinel = sentinel
-      sentinel.addEventListener('release', () => {
-        if (this.sentinel === sentinel) {
-          this.sentinel = undefined
-        }
-      })
-      return 'active'
-    } catch {
-      return 'unavailable'
+    if (this.acquisition) {
+      return this.acquisition
     }
+
+    const acquisition = wakeLock
+      .request('screen')
+      .then(async (sentinel) => {
+        if (!this.wantsWakeLock) {
+          await this.releaseSentinel(sentinel)
+          return 'unavailable' as const
+        }
+
+        this.sentinel = sentinel
+        sentinel.addEventListener('release', () => {
+          if (this.sentinel === sentinel) {
+            this.sentinel = undefined
+          }
+        })
+        return 'active' as const
+      })
+      .catch(() => 'unavailable' as const)
+
+    this.acquisition = acquisition
+    void acquisition.finally(() => {
+      if (this.acquisition === acquisition) {
+        this.acquisition = undefined
+      }
+    })
+    return acquisition
   }
 
   async reacquireWhenVisible(): Promise<'active' | 'unavailable'> {
@@ -55,11 +73,18 @@ export class WakeLockController {
     this.wantsWakeLock = false
     const sentinel = this.sentinel
     this.sentinel = undefined
+    const acquisition = this.acquisition
 
-    if (!sentinel) {
-      return
+    if (sentinel) {
+      await this.releaseSentinel(sentinel)
     }
 
+    if (acquisition) {
+      await acquisition
+    }
+  }
+
+  private async releaseSentinel(sentinel: WakeLockSentinel): Promise<void> {
     try {
       await sentinel.release()
     } catch {

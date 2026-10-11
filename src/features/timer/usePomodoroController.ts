@@ -14,7 +14,7 @@ import type { ActiveSession, AppData, Locale } from '../../domain/types'
 
 type AudioPort = Pick<AudioController, 'start' | 'stop'> &
   Partial<Pick<AudioController, 'select' | 'setVolume'>>
-type WakeLockPort = Pick<WakeLockController, 'acquire' | 'reacquireWhenVisible' | 'release'>
+type WakeLockPort = Pick<WakeLockController, 'acquire' | 'release'>
 
 export interface PomodoroController {
   locale: Locale
@@ -67,8 +67,10 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   const [clock, setClock] = useState(() => now())
   const [isVisible, setIsVisible] = useState(() => environmentDocument.visibilityState === 'visible')
   const [wakeLockStatus, setWakeLockStatus] = useState<'active' | 'unavailable' | 'idle'>('idle')
-  const wakeLockWasUserActivated = useRef(false)
   const completionInFlight = useRef(false)
+  const activationOperation = useRef(0)
+  const mounted = useRef(true)
+  const resourceQueue = useRef<Promise<void>>(Promise.resolve())
 
   useEffect(() => {
     if (!options.appData) return
@@ -81,9 +83,6 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     function handleVisibilityChange() {
       const visible = environmentDocument.visibilityState === 'visible'
       setIsVisible(visible)
-      if (visible && session?.phase === 'focus' && wakeLockWasUserActivated.current) {
-        void wakeLock.reacquireWhenVisible().then(setWakeLockStatus)
-      }
       if (visible && isRunning(session)) setClock(now())
     }
 
@@ -98,13 +97,15 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     return () => window.clearInterval(interval)
   }, [isVisible, now, session])
 
-  useEffect(
-    () => () => {
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+      invalidateActivation()
       audio.stop()
       void wakeLock.release()
-    },
-    [audio, wakeLock],
-  )
+    }
+  }, [audio, wakeLock])
 
   function persist(nextSession: ActiveSession | undefined, history = appData.history) {
     const nextAppData = { ...appData, activeSession: nextSession, history }
@@ -115,24 +116,50 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     setClock(now())
   }
 
-  async function activateResources(nextSession: ActiveSession) {
+  function queueResourceTransition(transition: () => Promise<void>): Promise<void> {
+    const queuedTransition = resourceQueue.current.then(transition, transition)
+    resourceQueue.current = queuedTransition.then(
+      () => undefined,
+      () => undefined,
+    )
+    return queuedTransition
+  }
+
+  function invalidateActivation() {
+    activationOperation.current += 1
+  }
+
+  function isCurrentActivation(operation: number) {
+    return mounted.current && activationOperation.current === operation
+  }
+
+  async function activateResources(nextSession: ActiveSession, operation: number) {
     if (appData.settings.selectedSound !== 'none') {
       await audio.select?.(appData.settings.selectedSound)
+      if (!isCurrentActivation(operation)) return
       audio.setVolume?.(appData.settings.soundVolume)
       await audio.start()
+      if (!isCurrentActivation(operation)) {
+        audio.stop()
+        return
+      }
     }
 
     if (nextSession.phase === 'focus' && appData.settings.keepScreenAwake) {
-      wakeLockWasUserActivated.current = true
-      setWakeLockStatus(await wakeLock.acquire())
+      if (!isCurrentActivation(operation)) return
+      const status = await wakeLock.acquire()
+      if (!isCurrentActivation(operation)) {
+        await wakeLock.release()
+        return
+      }
+      setWakeLockStatus(status)
     }
   }
 
   async function releaseResources() {
     audio.stop()
-    wakeLockWasUserActivated.current = false
     await wakeLock.release()
-    setWakeLockStatus('idle')
+    if (mounted.current) setWakeLockStatus('idle')
   }
 
   function setTaskName(value: string) {
@@ -142,31 +169,37 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
 
   async function start() {
     const nextSession = startSession(now(), appData.settings, taskName || undefined)
+    const operation = activationOperation.current + 1
+    activationOperation.current = operation
     persist(nextSession)
-    await activateResources(nextSession)
+    await queueResourceTransition(() => activateResources(nextSession, operation))
   }
 
   async function pause() {
     if (!isRunning(session)) return
+    invalidateActivation()
     persist(pauseSession(session, now()))
-    await releaseResources()
+    await queueResourceTransition(releaseResources)
   }
 
   async function resume() {
     if (session?.phase !== 'paused') return
     const nextSession = resumeSession(session, now())
+    const operation = activationOperation.current + 1
+    activationOperation.current = operation
     persist(nextSession)
-    if (isRunning(nextSession)) await activateResources(nextSession)
+    if (isRunning(nextSession)) await queueResourceTransition(() => activateResources(nextSession, operation))
   }
 
   async function finishCurrentPhase() {
     if (!isRunning(session)) return
+    invalidateActivation()
     const transition = completeCurrentPhase(session, appData.settings, now())
     persist(
       transition.nextSession,
       transition.historyItem ? [...appData.history, transition.historyItem] : appData.history,
     )
-    await releaseResources()
+    await queueResourceTransition(releaseResources)
   }
 
   useEffect(() => {
