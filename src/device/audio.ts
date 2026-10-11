@@ -29,7 +29,7 @@ export class AudioController {
 
   setVolume(volume: number): void {
     if (this.audio) {
-      this.audio.volume = Math.min(1, Math.max(0, volume))
+      this.audio.volume = Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0
     }
   }
 

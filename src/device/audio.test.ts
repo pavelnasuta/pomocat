@@ -35,6 +35,16 @@ test('clamps the selected audio volume to the browser range', async () => {
   expect(audio.volume).toBe(1)
 })
 
+test('normalizes NaN before assigning browser audio volume', async () => {
+  const audio = document.createElement('audio')
+  const controller = new AudioController(() => audio)
+
+  await controller.select('rain')
+
+  expect(() => controller.setVolume(Number.NaN)).not.toThrow()
+  expect(audio.volume).toBe(0)
+})
+
 test('plays the selected audio element', async () => {
   const selectedAudio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
   const fallbackAudio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
