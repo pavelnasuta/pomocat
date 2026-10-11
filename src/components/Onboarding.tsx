@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { loadAppData } from '../data/storage'
 import { useTranslation } from '../i18n/useTranslation'
 
 interface OnboardingProps {
@@ -6,7 +7,8 @@ interface OnboardingProps {
 }
 
 export function Onboarding({ onComplete }: OnboardingProps) {
-  const { t } = useTranslation('ru')
+  const locale = loadAppData(localStorage).settings.locale
+  const { t } = useTranslation(locale)
   const [name, setName] = useState('')
   const [hasNameError, setHasNameError] = useState(false)
 
