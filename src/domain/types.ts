@@ -30,6 +30,12 @@ export interface ActiveSession {
   startedAt: string
   remainingSeconds: number
   completedRounds: number
+  targetEndsAt?: number
+  totalMs?: number
+  completedFocusRounds?: number
+  remainingMsWhenPaused?: number
+  pausedPhase?: Exclude<Phase, 'idle' | 'paused'>
+  taskName?: string
 }
 
 export interface SessionHistoryItem {
