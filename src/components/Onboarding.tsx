@@ -26,15 +26,20 @@ export function Onboarding({ onComplete }: OnboardingProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <label htmlFor="child-name">{t('onboarding.nameLabel')}</label>
-      <input
-        id="child-name"
-        value={name}
-        onChange={(event) => setName(event.target.value)}
-      />
-      {hasNameError && <p role="alert">{t('onboarding.nameRequired')}</p>}
-      <button type="submit">{t('onboarding.continue')}</button>
-    </form>
+    <main className="onboarding-screen" aria-label="pomokitty">
+      <section className="onboarding-card">
+        <h1 id="onboarding-title">{t('onboarding.nameLabel')}</h1>
+        <form className="onboarding-form" onSubmit={handleSubmit}>
+          <label htmlFor="child-name">{t('onboarding.nameLabel')}</label>
+          <input
+            id="child-name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+          />
+          {hasNameError && <p role="alert">{t('onboarding.nameRequired')}</p>}
+          <button type="submit">{t('onboarding.continue')}</button>
+        </form>
+      </section>
+    </main>
   )
 }

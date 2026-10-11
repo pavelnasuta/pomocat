@@ -1,15 +1,374 @@
 :root {
-  font-family: system-ui, sans-serif;
-  color: #2b202d;
-  background: #fef7ff;
+  font-family: Inter, ui-rounded, "SF Pro Rounded", system-ui, sans-serif;
+  color: var(--color-dark-blue);
+  background: var(--color-cream);
+  font-synthesis: none;
+
+  --color-cream: #fff8ea;
+  --color-terracotta: #c96345;
+  --color-dark-blue: #233a55;
+  --color-mint: #a9d8bf;
+  --color-surface: #fffdf8;
+  --color-border: #d9cbb7;
+  --color-focus-ring: #245d8d;
+  --shadow-soft: 0 10px 32px rgb(35 58 85 / 12%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
+  min-width: 320px;
   margin: 0;
+  background: var(--color-cream);
 }
 
-main {
-  min-height: 100vh;
+button,
+input {
+  font: inherit;
+}
+
+button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+.onboarding-screen,
+.app-shell {
+  width: min(100%, 44rem);
+  min-height: 100dvh;
+  margin: 0 auto;
+}
+
+.onboarding-screen {
   display: grid;
   place-items: center;
+  padding: 24px;
+}
+
+.onboarding-card {
+  width: min(100%, 28rem);
+  padding: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 28px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-soft);
+}
+
+.onboarding-card h1,
+.app-section h1 {
+  margin: 0;
+  color: var(--color-dark-blue);
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  line-height: 1.1;
+}
+
+.onboarding-form {
+  display: grid;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.onboarding-form label {
+  font-weight: 600;
+}
+
+.onboarding-form input {
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-dark-blue);
+  background: var(--color-cream);
+}
+
+.onboarding-form button {
+  margin-top: 8px;
+  border-radius: 12px;
+  color: var(--color-surface);
+  background: var(--color-terracotta);
+  font-weight: 700;
+}
+
+.onboarding-form [role='alert'] {
+  margin: 0;
+  color: var(--color-terracotta);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-cream);
+}
+
+.app-shell__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: max(20px, env(safe-area-inset-top)) 20px 16px;
+}
+
+.app-shell__brand {
+  color: var(--color-terracotta);
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.app-shell__greeting {
+  margin: 0;
+  color: var(--color-dark-blue);
+  font-size: 0.95rem;
+}
+
+.app-shell__content {
+  min-height: 0;
+}
+
+.app-section {
+  min-height: 0;
+  padding: 20px;
+}
+
+.app-section--timer {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-section--timer .mascot {
+  align-self: center;
+  justify-self: center;
+}
+
+.app-section--scroll {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.bottom-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.bottom-nav__button {
+  border-radius: 12px;
+  color: var(--color-dark-blue);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.bottom-nav__button[aria-current='page'] {
+  color: var(--color-surface);
+  background: var(--color-terracotta);
+}
+
+.mascot {
+  position: relative;
+  width: 180px;
+  height: 150px;
+}
+
+.mascot__body {
+  position: absolute;
+  right: 18px;
+  bottom: 4px;
+  width: 118px;
+  height: 82px;
+  border-radius: 58% 58% 40% 40%;
+  background: var(--color-terracotta);
+  transform-origin: bottom center;
+}
+
+.mascot__tail {
+  position: absolute;
+  right: 0;
+  bottom: 30px;
+  width: 68px;
+  height: 24px;
+  border: 13px solid var(--color-terracotta);
+  border-left: 0;
+  border-radius: 0 42px 42px 0;
+  transform-origin: left center;
+}
+
+.mascot__head {
+  position: absolute;
+  left: 19px;
+  top: 8px;
+  width: 104px;
+  height: 92px;
+  border-radius: 46% 46% 42% 42%;
+  background: var(--color-terracotta);
+}
+
+.mascot__ear {
+  position: absolute;
+  top: -17px;
+  width: 35px;
+  height: 43px;
+  border-radius: 10px 28px 10px 28px;
+  background: var(--color-terracotta);
+  transform-origin: bottom center;
+}
+
+.mascot__ear--left {
+  left: 7px;
+  transform: rotate(-24deg);
+}
+
+.mascot__ear--right {
+  right: 7px;
+  transform: scaleX(-1) rotate(-24deg);
+}
+
+.mascot__face {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  width: 54px;
+  height: 28px;
+  transform: translateX(-50%);
+}
+
+.mascot__eye {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-dark-blue);
+  transform-origin: center;
+}
+
+.mascot__eye--left {
+  left: 6px;
+}
+
+.mascot__eye--right {
+  right: 6px;
+}
+
+.mascot__nose {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 9px;
+  height: 7px;
+  border-radius: 50% 50% 55% 55%;
+  background: var(--color-mint);
+  transform: translateX(-50%);
+}
+
+.mascot--active .mascot__body {
+  animation: mascot-breathe 2.8s ease-in-out infinite;
+}
+
+.mascot--active .mascot__eye {
+  animation: mascot-blink 5s step-end infinite;
+}
+
+.mascot--active .mascot__ear {
+  animation: mascot-ear-twitch 3.4s ease-in-out infinite;
+}
+
+.mascot--active .mascot__tail {
+  animation: mascot-tail-sway 2.4s ease-in-out infinite;
+}
+
+@keyframes mascot-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.025, 0.97);
+  }
+}
+
+@keyframes mascot-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes mascot-ear-twitch {
+  0%,
+  82%,
+  100% {
+    translate: 0 0;
+  }
+
+  88% {
+    translate: 0 -3px;
+  }
+}
+
+@keyframes mascot-tail-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  50% {
+    transform: rotate(9deg);
+  }
+}
+
+@media (min-width: 48rem) {
+  .app-shell {
+    border-inline: 1px solid var(--color-border);
+  }
+
+  .app-section {
+    padding-inline: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .mascot--active .mascot__body,
+  .mascot--active .mascot__eye,
+  .mascot--active .mascot__ear,
+  .mascot--active .mascot__tail {
+    animation: none;
+  }
 }
