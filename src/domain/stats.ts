@@ -13,7 +13,9 @@ function sumCompletedWithin(
 ): number {
   return history.reduce((total, item) => {
     const completedAt = new Date(item.completedAt)
-    return completedAt >= start && completedAt < end ? total + item.durationMinutes : total
+    return item.phase === 'focus' && completedAt >= start && completedAt < end
+      ? total + item.durationMinutes
+      : total
   }, 0)
 }
 

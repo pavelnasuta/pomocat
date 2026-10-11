@@ -85,11 +85,23 @@ export function resumeSession(session: ActiveSession, now: number): ActiveSessio
   if (session.phase !== 'paused') return session
 
   const { remainingMsWhenPaused, pausedPhase, ...activeSession } = session
+  if (!pausedPhase) {
+    // Legacy paused records do not retain their original phase, so resuming
+    // them as focus could turn a saved break into concentration time.
+    return {
+      ...activeSession,
+      phase: 'idle',
+      remainingSeconds: 0,
+      targetEndsAt: undefined,
+      totalMs: undefined,
+    }
+  }
+
   const remainingMs = remainingMsWhenPaused ?? session.remainingSeconds * 1_000
 
   return {
     ...activeSession,
-    phase: pausedPhase ?? 'focus',
+    phase: pausedPhase,
     startedAt: new Date(now).toISOString(),
     remainingSeconds: remainingMs / 1_000,
     targetEndsAt: now + remainingMs,

@@ -1,5 +1,5 @@
 import { completeCurrentPhase, getTimerView, pauseSession, resumeSession, startSession } from './timer'
-import type { PomodoroSettings } from './types'
+import type { ActiveSession, PomodoroSettings } from './types'
 
 const settings: PomodoroSettings = {
   locale: 'en',
@@ -71,4 +71,33 @@ test('does not add a history item when a break ends', () => {
 
   expect(nextTransition.nextPhase).toBe('focus')
   expect(nextTransition.historyItem).toBeUndefined()
+})
+
+test('starts a configured short break after an ordinary focus completion', () => {
+  const transition = completeCurrentPhase(startSession(0, settings), settings, 25 * 60 * 1_000)
+
+  expect(transition.nextPhase).toBe('shortBreak')
+  expect(transition.nextSession.totalMs).toBe(5 * 60 * 1_000)
+})
+
+test('derives a non-paused legacy session without an absolute deadline', () => {
+  const legacySession: ActiveSession = {
+    phase: 'focus',
+    startedAt: new Date(0).toISOString(),
+    remainingSeconds: 25 * 60,
+    completedRounds: 0,
+  }
+
+  expect(getTimerView(legacySession, 60 * 1_000).remainingMs).toBe(24 * 60 * 1_000)
+})
+
+test('safely resets an ambiguous legacy paused session to idle', () => {
+  const legacyPausedSession: ActiveSession = {
+    phase: 'paused',
+    startedAt: new Date(0).toISOString(),
+    remainingSeconds: 5 * 60,
+    completedRounds: 1,
+  }
+
+  expect(resumeSession(legacyPausedSession, 60 * 1_000).phase).toBe('idle')
 })

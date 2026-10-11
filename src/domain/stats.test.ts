@@ -45,3 +45,25 @@ test('excludes the following Monday from the current week', () => {
 
   expect(getWeeklyMinutes(mixedHistory, new Date('2026-10-11T12:00:00.000Z'))).toBe(25)
 })
+
+test('excludes break entries from daily and weekly focus totals', () => {
+  const mixedHistory: SessionHistoryItem[] = [
+    ...history,
+    {
+      id: 'short-break',
+      phase: 'shortBreak',
+      durationMinutes: 5,
+      completedAt: '2026-10-11T10:00:00.000Z',
+    },
+    {
+      id: 'long-break',
+      phase: 'longBreak',
+      durationMinutes: 15,
+      completedAt: '2026-10-11T11:00:00.000Z',
+    },
+  ]
+
+  const now = new Date('2026-10-11T12:00:00.000Z')
+  expect(getDailyMinutes(mixedHistory, now)).toBe(25)
+  expect(getWeeklyMinutes(mixedHistory, now)).toBe(25)
+})
