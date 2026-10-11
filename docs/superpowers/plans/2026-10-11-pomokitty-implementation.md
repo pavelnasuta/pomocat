@@ -114,7 +114,7 @@ Use these package scripts:
 }
 ```
 
-Configure Vitest in `vite.config.ts` with `environment: 'jsdom'`, `setupFiles: ['./src/test/setup.ts']`, and `css: true`. Export this minimal root:
+Configure Vitest in `vite.config.ts` with `environment: 'jsdom'`, `setupFiles: ['./src/test/setup.ts']`, `css: true` and `globals: true`. Install `@testing-library/jest-dom` and add `import '@testing-library/jest-dom/vitest'` to `src/test/setup.ts`. Export this minimal root:
 
 ```tsx
 // src/app/App.tsx
@@ -148,7 +148,7 @@ git commit -m "chore: scaffold pomokitty React PWA"
 - Create: `src/components/Onboarding.test.tsx`
 
 **Interfaces:**
-- Produces `AppData`, `PomodoroSettings`, `ActiveSession`, `SessionHistoryItem`, `Phase` and `Locale` from `src/domain/types.ts`.
+- Produces `AppData`, `PomodoroSettings`, `ActiveSession`, `SessionHistoryItem`, `Phase`, `Locale` and `SoundId` from `src/domain/types.ts`.
 - Produces `loadAppData(storage: Storage): AppData`, `saveAppData(storage: Storage, data: AppData): void`, and `clearAppData(storage: Storage): void` from `src/data/storage.ts`.
 - Produces `useTranslation(locale: Locale): { t(key: MessageKey): string }`.
 - Produces `Onboarding({ onComplete }: { onComplete(name: string): void })`.
@@ -192,6 +192,7 @@ Use these core contracts:
 
 ```ts
 export type Locale = 'ru' | 'en'
+export type SoundId = 'rain' | 'forest' | 'fireplace' | 'ocean' | 'whiteNoise' | 'none'
 export type Phase = 'idle' | 'focus' | 'shortBreak' | 'longBreak' | 'paused'
 
 export interface PomodoroSettings {
@@ -205,7 +206,7 @@ export interface PomodoroSettings {
   animationsEnabled: boolean
   notificationsEnabled: boolean
   keepScreenAwake: boolean
-  selectedSound: 'rain' | 'forest' | 'fireplace' | 'ocean' | 'whiteNoise' | 'none'
+  selectedSound: SoundId
   soundVolume: number
 }
 
@@ -400,7 +401,7 @@ Expected: failure because the composed shell and components are incomplete.
 
 Create CSS custom properties for cream, terracotta, muted dark-blue, mint, surface, border and focus-ring colors. Use a fixed-height mobile shell and `min-height: 100dvh`. The timer section must use a non-scrolling grid; other sections may scroll inside their own content area. Make every button at least 44×44 px.
 
-Make the mascot from semantic nested spans or divs, not a copied image. Apply `mascot--active` only when `active && animationsEnabled`; include breathing, blink, ear and tail keyframes. Disable those animations inside `@media (prefers-reduced-motion: reduce)`.
+Make the mascot from semantic nested spans or divs, not a copied image. Set its `data-animated` attribute to the string form of `active && animationsEnabled`. Apply `mascot--active` only when `active && animationsEnabled`; include breathing, blink, ear and tail keyframes. Disable those animations inside `@media (prefers-reduced-motion: reduce)`.
 
 - [ ] **Step 4: Run component tests and a production build.**
 
