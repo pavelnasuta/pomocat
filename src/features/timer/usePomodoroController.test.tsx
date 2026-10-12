@@ -255,6 +255,48 @@ test('waits for an explicit resume after an elapsed phase when automatic transit
   vi.useRealTimers()
 })
 
+test('restarts break audio and focus wake lock across automatic deadline transitions', async () => {
+  vi.useFakeTimers()
+  let now = 0
+  const audio = {
+    select: vi.fn().mockResolvedValue(undefined),
+    setVolume: vi.fn(),
+    start: vi.fn().mockResolvedValue('playing'),
+    stop: vi.fn(),
+  }
+  const wakeLock = {
+    acquire: vi.fn().mockResolvedValue('active'),
+    release: vi.fn().mockResolvedValue(undefined),
+  }
+  const data = loadAppData(localStorage)
+  data.settings.focusMinutes = 1
+  data.settings.shortBreakMinutes = 1
+  data.settings.autoStartNext = true
+  data.settings.keepScreenAwake = true
+  data.settings.selectedSound = 'rain'
+  const { result } = renderHook(() => usePomodoroController({ appData: data, now: () => now, audio, wakeLock }))
+
+  await act(async () => { await result.current.start() })
+  now = 60_000
+  await act(async () => { await vi.advanceTimersByTimeAsync(250) })
+
+  expect(result.current.view.phase).toBe('shortBreak')
+  expect(audio.select).toHaveBeenCalledTimes(2)
+  expect(audio.start).toHaveBeenCalledTimes(2)
+  expect(wakeLock.acquire).toHaveBeenCalledTimes(1)
+  expect(wakeLock.release).toHaveBeenCalledTimes(1)
+
+  now = 120_000
+  await act(async () => { await vi.advanceTimersByTimeAsync(250) })
+
+  expect(result.current.view.phase).toBe('focus')
+  expect(audio.select).toHaveBeenCalledTimes(3)
+  expect(audio.start).toHaveBeenCalledTimes(3)
+  expect(wakeLock.acquire).toHaveBeenCalledTimes(2)
+  expect(wakeLock.release).toHaveBeenCalledTimes(2)
+  vi.useRealTimers()
+})
+
 test('uses one real Wake Lock visibility owner and releases the returned sentinel', async () => {
   const environment = visibilityDocument()
   const first = wakeLockSentinel()
@@ -460,6 +502,23 @@ test('sends one localized completion notification only when enabled', async () =
   await act(async () => { await result.current.start() })
   await act(async () => { await result.current.finishCurrentPhase() })
 
-  expect(notifications.notify).toHaveBeenCalledTimes(1)
+  expect(notifications.notify).toHaveBeenCalledOnce()
   expect(notifications.notify).toHaveBeenCalledWith('Phase complete', 'Time for a break')
+})
+
+test('emits one notification for rapid manual completion and permits the next phase completion', async () => {
+  const notifications = { notify: vi.fn() }
+  const data = loadAppData(localStorage)
+  data.settings.notificationsEnabled = true
+  const { result } = renderHook(() => usePomodoroController({ appData: data, notifications, now: () => 60_000 }))
+
+  await act(async () => { await result.current.start() })
+  await act(async () => {
+    await Promise.all([result.current.finishCurrentPhase(), result.current.finishCurrentPhase()])
+  })
+
+  expect(notifications.notify).toHaveBeenCalledTimes(1)
+
+  await act(async () => { await result.current.finishCurrentPhase() })
+  expect(notifications.notify).toHaveBeenCalledTimes(2)
 })

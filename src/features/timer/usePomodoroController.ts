@@ -222,25 +222,39 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     if (isRunning(nextSession)) await queueResourceTransition(() => activateResources(nextSession, operation, appData.settings))
   }
 
-  async function finishCurrentPhase(autoStartNext = true) {
-    if (!isRunning(session)) return
-    invalidateActivation()
-    const transition = completeCurrentPhase(session, appData.settings, now())
-    const nextSession = autoStartNext
-      ? transition.nextSession
-      : pauseSession(transition.nextSession, now())
-    persist(
-      nextSession,
-      transition.historyItem ? [...appData.history, transition.historyItem] : appData.history,
-    )
-    if (appData.settings.notificationsEnabled) {
-      const messages = dictionaries[appData.settings.locale]
-      notifications.notify(
-        messages['notification.phaseCompleted.title'],
-        session.phase === 'focus' ? messages['notification.focusCompleted.body'] : messages['notification.breakCompleted.body'],
+  async function finishCurrentPhase(autoStartNext = true, activateAutomaticallyStartedPhase = false) {
+    if (!isRunning(session) || completionInFlight.current) return
+    completionInFlight.current = true
+    try {
+      invalidateActivation()
+      const nextActivation = activateAutomaticallyStartedPhase && autoStartNext
+        ? activationOperation.current + 1
+        : undefined
+      if (nextActivation !== undefined) activationOperation.current = nextActivation
+      const transition = completeCurrentPhase(session, appData.settings, now())
+      const nextSession = autoStartNext
+        ? transition.nextSession
+        : pauseSession(transition.nextSession, now())
+      persist(
+        nextSession,
+        transition.historyItem ? [...appData.history, transition.historyItem] : appData.history,
       )
+      if (appData.settings.notificationsEnabled) {
+        const messages = dictionaries[appData.settings.locale]
+        notifications.notify(
+          messages['notification.phaseCompleted.title'],
+          session.phase === 'focus' ? messages['notification.focusCompleted.body'] : messages['notification.breakCompleted.body'],
+        )
+      }
+      await queueResourceTransition(async () => {
+        await releaseResources()
+        if (nextActivation !== undefined && isRunning(nextSession)) {
+          await activateResources(nextSession, nextActivation, appData.settings)
+        }
+      })
+    } finally {
+      completionInFlight.current = false
     }
-    await queueResourceTransition(releaseResources)
   }
 
   async function reset() {
@@ -255,10 +269,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   useEffect(() => {
     if (!isRunning(session) || !getTimerView(session, clock).isFinished || completionInFlight.current) return
 
-    completionInFlight.current = true
-    void finishCurrentPhase(appData.settings.autoStartNext).finally(() => {
-      completionInFlight.current = false
-    })
+    void finishCurrentPhase(appData.settings.autoStartNext, true)
   }, [clock, session])
 
   useEffect(() => {

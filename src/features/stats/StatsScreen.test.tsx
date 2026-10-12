@@ -36,6 +36,21 @@ test('shows local session history in reverse completion order', () => {
   expect(entries[1]).toHaveTextContent('Короткий перерыв')
 })
 
+test('shows a localized task title only for history entries that have one', () => {
+  render(
+    <StatsScreen
+      history={[
+        { id: 'titled', phase: 'focus', durationMinutes: 25, completedAt: '2026-10-11T11:00:00.000Z', taskName: 'Математика' },
+        ...history,
+      ]}
+    />,
+  )
+
+  const entries = within(screen.getByRole('list', { name: 'История сессий' })).getAllByRole('listitem')
+  expect(entries[0]).toHaveTextContent('Задача: Математика')
+  expect(entries[1]).not.toHaveTextContent('Задача')
+})
+
 test('uses the current app locale for English statistics', () => {
   render(<StatsScreen history={history} locale="en" />)
 

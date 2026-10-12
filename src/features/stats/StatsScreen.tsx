@@ -58,6 +58,7 @@ export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
               <li key={item.id}>
                 <span>{historyLabel(item.phase, t)}</span>
                 <span>{formatMinutes(item.durationMinutes, t)}</span>
+                {item.taskName && <span>{t('stats.task', { taskName: item.taskName })}</span>}
                 <time dateTime={item.completedAt}>{formatCompletedAt(item.completedAt, locale)}</time>
               </li>
             ))}

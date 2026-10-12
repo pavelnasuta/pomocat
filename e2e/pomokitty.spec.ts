@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test'
 
+interface PomokittyTestWindow {
+  advancePomokittyClock(milliseconds: number): void
+  pomokittyResources: { plays: number, wakeRequests: number, wakeReleases: number }
+}
+
 const requiredDiagnosticViewports = [
   { width: 320, height: 568 },
   { width: 360, height: 800 },
@@ -196,6 +201,60 @@ test('honors manual and automatic expiry transitions', async ({ page }) => {
   await page.reload()
   await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible()
   await expect(page.locator('.timer-screen__status output')).toHaveText('05:00')
+})
+
+test('restores selected audio and focus wake lock across automatic transitions', async ({ page }) => {
+  await page.addInitScript(() => {
+    let now = 1_000_000
+    const resources = { plays: 0, wakeRequests: 0, wakeReleases: 0 }
+    Date.now = () => now
+    Object.defineProperty(window, 'advancePomokittyClock', {
+      configurable: true,
+      value: (milliseconds: number) => { now += milliseconds },
+    })
+    Object.defineProperty(window, 'pomokittyResources', { configurable: true, value: resources })
+
+    class TestAudio {
+      loop = false
+      volume = 1
+      currentTime = 0
+      play() { resources.plays += 1; return Promise.resolve() }
+      pause() {}
+    }
+    Object.defineProperty(window, 'Audio', { configurable: true, value: TestAudio })
+    Object.defineProperty(navigator, 'wakeLock', {
+      configurable: true,
+      value: {
+        request: () => {
+          resources.wakeRequests += 1
+          return Promise.resolve({
+            addEventListener() {},
+            release: () => { resources.wakeReleases += 1; return Promise.resolve() },
+          })
+        },
+      },
+    })
+  })
+  await page.goto('/pomokitty/')
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await page.getByRole('button', { name: 'Настройки' }).click()
+  await page.getByLabel('Фокус, минуты').fill('1')
+  await page.getByLabel('Короткий перерыв, минуты').fill('1')
+  await page.getByLabel('Начинать следующий этап автоматически').check()
+  await page.getByLabel('Фоновый звук').selectOption('rain')
+  await page.getByLabel('Не выключать экран во время фокуса').check()
+  await page.getByRole('button', { name: 'Таймер' }).click()
+  await page.getByRole('button', { name: 'Начать' }).click()
+
+  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 1, wakeRequests: 1, wakeReleases: 0 })
+  await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(60_000))
+  await expect(page.locator('.timer-screen__status p')).toHaveText('Короткий перерыв')
+  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 2, wakeRequests: 1, wakeReleases: 1 })
+
+  await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(60_000))
+  await expect(page.locator('.timer-screen__status p')).toHaveText('Фокус')
+  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 3, wakeRequests: 2, wakeReleases: 1 })
 })
 
 test('requests notification permission only from settings and sends one completion notification', async ({ page }) => {
