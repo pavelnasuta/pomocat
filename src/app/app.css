@@ -243,6 +243,136 @@ input:focus-visible {
   overscroll-behavior: contain;
 }
 
+.settings-screen,
+.stats-screen {
+  display: grid;
+  gap: 18px;
+  padding-bottom: 20px;
+}
+
+.settings-screen__form {
+  display: grid;
+  gap: 16px;
+}
+
+.settings-screen fieldset,
+.stats-screen__total,
+.stats-screen__history {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+}
+
+.settings-screen legend {
+  padding: 0 4px;
+  color: var(--color-terracotta);
+  font-weight: 700;
+}
+
+.settings-screen label,
+.settings-screen__name-row {
+  display: grid;
+  gap: 6px;
+}
+
+.settings-screen input:not([type='checkbox']):not([type='range']),
+.settings-screen select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  color: var(--color-dark-blue);
+  background: var(--color-cream);
+}
+
+.settings-screen__name-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.settings-screen__name-row button,
+.settings-screen__danger button {
+  border-radius: 10px;
+  color: var(--color-surface);
+  background: var(--color-terracotta);
+  font-weight: 700;
+}
+
+.settings-screen__toggle {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  min-height: 44px;
+}
+
+.settings-screen__toggle input {
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.sound-settings input[type='range'] {
+  width: 100%;
+  min-height: 32px;
+  accent-color: var(--color-terracotta);
+}
+
+.settings-screen__danger [role='alert'] {
+  display: grid;
+  gap: 8px;
+  color: var(--color-dark-blue);
+}
+
+.settings-screen__danger [role='alert'] button + button {
+  color: var(--color-dark-blue);
+  background: var(--color-cream);
+  border: 1px solid var(--color-border);
+}
+
+.stats-screen__totals {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stats-screen__total h2,
+.stats-screen__history h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.stats-screen__total output {
+  color: var(--color-terracotta);
+  font-size: clamp(1.6rem, 8vw, 2.5rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-screen__history ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stats-screen__history li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.stats-screen__history time {
+  grid-column: 1 / -1;
+  color: color-mix(in srgb, var(--color-dark-blue), transparent 35%);
+  font-size: 0.8125rem;
+}
+
 .bottom-nav {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

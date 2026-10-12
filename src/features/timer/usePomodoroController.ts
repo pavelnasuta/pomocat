@@ -22,6 +22,7 @@ export interface PomodoroController {
   view: TimerView
   taskName: string
   wakeLockStatus: 'active' | 'unavailable' | 'idle'
+  audioStatus: 'idle' | 'blocked'
   setTaskName(value: string): void
   start(): Promise<void>
   pause(): Promise<void>
@@ -67,6 +68,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   const [clock, setClock] = useState(() => now())
   const [isVisible, setIsVisible] = useState(() => environmentDocument.visibilityState === 'visible')
   const [wakeLockStatus, setWakeLockStatus] = useState<'active' | 'unavailable' | 'idle'>('idle')
+  const [audioStatus, setAudioStatus] = useState<'idle' | 'blocked'>('idle')
   const completionInFlight = useRef(false)
   const activationOperation = useRef(0)
   const mounted = useRef(true)
@@ -135,13 +137,18 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
 
   async function activateResources(nextSession: ActiveSession, operation: number) {
     if (appData.settings.selectedSound !== 'none') {
-      await audio.select?.(appData.settings.selectedSound)
-      if (!isCurrentActivation(operation)) return
-      audio.setVolume?.(appData.settings.soundVolume)
-      await audio.start()
-      if (!isCurrentActivation(operation)) {
-        audio.stop()
-        return
+      try {
+        await audio.select?.(appData.settings.selectedSound)
+        if (!isCurrentActivation(operation)) return
+        audio.setVolume?.(appData.settings.soundVolume)
+        const playback = await audio.start()
+        if (!isCurrentActivation(operation)) {
+          audio.stop()
+          return
+        }
+        setAudioStatus(playback === 'blocked' ? 'blocked' : 'idle')
+      } catch {
+        if (isCurrentActivation(operation)) setAudioStatus('blocked')
       }
     }
 
@@ -171,6 +178,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     const nextSession = startSession(now(), appData.settings, taskName || undefined)
     const operation = activationOperation.current + 1
     activationOperation.current = operation
+    setAudioStatus('idle')
     persist(nextSession)
     await queueResourceTransition(() => activateResources(nextSession, operation))
   }
@@ -217,6 +225,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     view: session ? getTimerView(session, clock) : idleView(),
     taskName,
     wakeLockStatus,
+    audioStatus,
     setTaskName,
     start,
     pause,

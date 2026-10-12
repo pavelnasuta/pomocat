@@ -82,6 +82,26 @@ test('starts and persists a focus session after a user action', async () => {
   })
 })
 
+test('reports a localized audio failure state without blocking a focus session', async () => {
+  const audio = {
+    select: vi.fn().mockResolvedValue(undefined),
+    setVolume: vi.fn(),
+    start: vi.fn().mockResolvedValue('blocked'),
+    stop: vi.fn(),
+  }
+  const data = loadAppData(localStorage)
+  data.settings.selectedSound = 'rain'
+  saveAppData(localStorage, data)
+  const { result } = renderHook(() => usePomodoroController({ audio }))
+
+  await act(async () => {
+    await result.current.start()
+  })
+
+  expect(result.current.view.phase).toBe('focus')
+  expect(result.current.audioStatus).toBe('blocked')
+})
+
 test('activates resources after a user start in React Strict Mode', async () => {
   const audio = { start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
   const wakeLock = { acquire: vi.fn().mockResolvedValue('active'), release: vi.fn().mockResolvedValue(undefined) }

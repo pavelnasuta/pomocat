@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { BottomNav, type NavigationSection } from '../components/BottomNav'
 import { Onboarding } from '../components/Onboarding'
-import { loadAppData, saveAppData } from '../data/storage'
+import { clearAppData, loadAppData, saveAppData } from '../data/storage'
+import { SettingsScreen } from '../features/settings/SettingsScreen'
+import { StatsScreen } from '../features/stats/StatsScreen'
 import { TimerScreen } from '../features/timer/TimerScreen'
 import { usePomodoroController } from '../features/timer/usePomodoroController'
+import type { PomodoroSettings } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
 
 export function App() {
@@ -13,17 +16,29 @@ export function App() {
   const effectiveLocale = appData.settings.locale
   const { t } = useTranslation(effectiveLocale)
 
+  function updateAppData(nextAppData: typeof appData) {
+    saveAppData(localStorage, nextAppData)
+    setAppData(nextAppData)
+  }
+
   function completeOnboarding(name: string) {
-    const nextAppData = {
+    updateAppData({
       ...appData,
       settings: {
         ...appData.settings,
         childName: name,
       },
-    }
+    })
+  }
 
-    saveAppData(localStorage, nextAppData)
-    setAppData(nextAppData)
+  function updateSettings(settings: PomodoroSettings) {
+    updateAppData({ ...appData, settings })
+  }
+
+  function clearData() {
+    clearAppData(localStorage)
+    setAppData(loadAppData(localStorage))
+    setActiveSection('timer')
   }
 
   if (!appData.settings.childName) {
@@ -50,12 +65,14 @@ export function App() {
         {activeSection === 'stats' && (
           <section className="app-section app-section--scroll" aria-labelledby="stats-section-title">
             <h1 id="stats-section-title">{t('navigation.stats')}</h1>
+            <StatsScreen history={appData.history} locale={effectiveLocale} />
           </section>
         )}
 
         {activeSection === 'settings' && (
           <section className="app-section app-section--scroll" aria-labelledby="settings-section-title">
             <h1 id="settings-section-title">{t('navigation.settings')}</h1>
+            <SettingsScreen data={appData} onChange={updateSettings} onClearData={clearData} />
           </section>
         )}
       </div>

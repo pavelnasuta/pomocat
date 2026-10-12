@@ -19,6 +19,7 @@ function controllerFor(
     },
     taskName: 'Math',
     wakeLockStatus: 'active',
+    audioStatus: 'idle',
     setTaskName: vi.fn(),
     start: vi.fn(),
     pause: vi.fn(),
@@ -69,4 +70,14 @@ test('renders the English finish control for an active phase', async () => {
   await user.click(screen.getByRole('button', { name: 'Finish phase' }))
 
   expect(controller.finishCurrentPhase).toHaveBeenCalledOnce()
+})
+
+test('shows a short localized audio status while keeping timer controls available', () => {
+  const controller = controllerFor('focus', 'en')
+  controller.audioStatus = 'blocked'
+
+  render(<TimerScreen controller={controller} />)
+
+  expect(screen.getByText('Could not play sound')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Pause' })).toBeEnabled()
 })

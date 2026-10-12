@@ -51,6 +51,7 @@ export function TimerScreen({ controller }: TimerScreenProps) {
           locale={controller.locale}
         />
         {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
+        {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}
         {isActive && (
           <button type="button" className="timer-screen__finish" onClick={() => void controller.finishCurrentPhase()}>
             {t('timer.finishPhase')}
