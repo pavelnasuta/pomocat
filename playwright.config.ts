@@ -20,7 +20,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort --base /pomokitty/',
+    command: 'npm run dev',
+    env: { POMOKITTY_E2E_PORT: '4173' },
     url: 'http://127.0.0.1:4173/pomokitty/',
     reuseExistingServer: false,
     timeout: 120_000,

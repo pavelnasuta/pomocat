@@ -21,13 +21,13 @@ npm run preview
 
 ## Проверка
 
-Полная детерминированная проверка (включая production-сборку и mobile Chromium на 375×667 и 412×915):
+Полная детерминированная проверка (включая production-сборку, `/pomokitty/` GitHub Pages assets и mobile Chromium):
 
 ```bash
 npm run lint && npm run test && npm run build && npm run test:e2e
 ```
 
-`npm run test:e2e` самостоятельно собирает приложение и запускает isolated preview на `127.0.0.1:4173/pomokitty/`; он не переиспользует уже запущенный dev-сервер. Скриншоты и trace сохраняются Playwright только при сбое.
+`npm run test:e2e` запускает isolated dev-server ровно командой `npm run dev` с `POMOKITTY_E2E_PORT=4173`; он не переиспользует уже запущенный сервер. Проверки рендеринга без прокрутки и наложений выполняются отдельно для 320×568, 360×800 и 393×852 (дополнительные сценарии используют 375×667 и 412×915). Vite dev assets загружаются от `/`, а E2E также собирает production-вариант и проверяет, что его JS/CSS/manifest используют `/pomokitty/` Pages base. Скриншоты и trace сохраняются Playwright только при сбое.
 
 ## Офлайн-работа
 

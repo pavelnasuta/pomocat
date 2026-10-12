@@ -1,5 +1,42 @@
 import { expect, test } from '@playwright/test'
 
+const requiredDiagnosticViewports = [
+  { width: 320, height: 568 },
+  { width: 360, height: 800 },
+  { width: 393, height: 852 },
+] as const
+
+for (const viewport of requiredDiagnosticViewports) {
+  test(`keeps the timer unscrolled and non-overlapping at ${viewport.width} by ${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport)
+    await page.goto('/pomokitty/')
+    await page.getByLabel('Как тебя зовут?').fill('Маша')
+    await page.getByRole('button', { name: 'Продолжить' }).click()
+
+    const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
+      const task = timerScreen.querySelector('input')
+      const primaryAction = timerScreen.querySelector('.timer-screen__primary')
+      if (!task || !primaryAction) throw new Error('Timer controls are missing')
+
+      const taskBox = task.getBoundingClientRect()
+      const primaryBox = primaryAction.getBoundingClientRect()
+      return {
+        pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
+        timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
+        taskBottom: taskBox.bottom,
+        primaryTop: primaryBox.top,
+        primaryBottom: primaryBox.bottom,
+        viewportHeight: window.innerHeight,
+      }
+    })
+
+    expect(geometry.pageScrollable).toBe(false)
+    expect(geometry.timerScrollable).toBe(false)
+    expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
+    expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
+  })
+}
+
 test('first mobile visit stores the Russian child name and keeps the timer inside 375 by 667', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/pomokitty/')

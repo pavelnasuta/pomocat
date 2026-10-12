@@ -4,6 +4,11 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? '/pomokitty/' : '/',
+  server: {
+    host: '127.0.0.1',
+    port: Number(process.env.POMOKITTY_E2E_PORT ?? 5173),
+    strictPort: true,
+  },
   plugins: [
     ...react(),
     ...VitePWA({
