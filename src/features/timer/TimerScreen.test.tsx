@@ -25,6 +25,7 @@ function controllerFor(
     pause: vi.fn(),
     resume: vi.fn(),
     finishCurrentPhase: vi.fn(),
+    reset: vi.fn(),
   }
 }
 

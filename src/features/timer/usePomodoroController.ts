@@ -28,6 +28,7 @@ export interface PomodoroController {
   pause(): Promise<void>
   resume(): Promise<void>
   finishCurrentPhase(): Promise<void>
+  reset(): Promise<void>
 }
 
 interface PomodoroControllerOptions {
@@ -210,6 +211,15 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     await queueResourceTransition(releaseResources)
   }
 
+  async function reset() {
+    invalidateActivation()
+    completionInFlight.current = false
+    persist(undefined)
+    setTaskNameState('')
+    setAudioStatus('idle')
+    await queueResourceTransition(releaseResources)
+  }
+
   useEffect(() => {
     if (!isRunning(session) || !getTimerView(session, clock).isFinished || completionInFlight.current) return
 
@@ -231,5 +241,6 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     pause,
     resume,
     finishCurrentPhase,
+    reset,
   }
 }

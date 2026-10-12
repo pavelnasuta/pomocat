@@ -72,6 +72,27 @@ test('updates the locale, durations, round count, and automatic transitions', as
   }))
 })
 
+test.each([
+  'Фокус, минуты',
+  'Короткий перерыв, минуты',
+  'Длинный перерыв, минуты',
+  'Раундов до длинного перерыва',
+])('does not persist empty or zero values for %s', async (label) => {
+  const { onChange } = renderSettings()
+  const user = userEvent.setup()
+  const input = screen.getByLabelText(label)
+
+  await user.clear(input)
+
+  expect(input).toHaveValue(null)
+  expect(onChange).not.toHaveBeenCalled()
+
+  await user.type(input, '0')
+
+  expect(input).toHaveValue(0)
+  expect(onChange).not.toHaveBeenCalled()
+})
+
 test('updates notifications, animation, and wake lock preferences', async () => {
   const { onChange } = renderSettings()
   const user = userEvent.setup()

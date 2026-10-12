@@ -9,19 +9,27 @@ export interface SettingsScreenProps {
   onClearData(): void
 }
 
-function durationValue(value: string): number {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+type NumericSetting = 'focusMinutes' | 'shortBreakMinutes' | 'longBreakMinutes' | 'roundsBeforeLongBreak'
+
+function numericInputs(settings: PomodoroSettings): Record<NumericSetting, string> {
+  return {
+    focusMinutes: String(settings.focusMinutes),
+    shortBreakMinutes: String(settings.shortBreakMinutes),
+    longBreakMinutes: String(settings.longBreakMinutes),
+    roundsBeforeLongBreak: String(settings.roundsBeforeLongBreak),
+  }
 }
 
 export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenProps) {
   const { t } = useTranslation(data.settings.locale)
   const [settings, setSettings] = useState(data.settings)
+  const [numericValues, setNumericValues] = useState(() => numericInputs(data.settings))
   const [name, setName] = useState(data.settings.childName ?? '')
   const [confirmingClear, setConfirmingClear] = useState(false)
 
   useEffect(() => {
     setSettings(data.settings)
+    setNumericValues(numericInputs(data.settings))
     setName(data.settings.childName ?? '')
   }, [data.settings])
 
@@ -34,6 +42,13 @@ export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenPr
   function saveName() {
     const childName = name.trim() || undefined
     updateSettings({ childName })
+  }
+
+  function updateNumericSetting(setting: NumericSetting, value: string) {
+    setNumericValues((current) => ({ ...current, [setting]: value }))
+    const parsed = Number(value)
+    if (value === '' || !Number.isFinite(parsed) || parsed < 1) return
+    updateSettings({ [setting]: parsed })
   }
 
   return (
@@ -63,19 +78,19 @@ export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenPr
           <legend>{t('settings.timer')}</legend>
           <label>
             <span>{t('settings.focusMinutes')}</span>
-            <input type="number" min="1" value={settings.focusMinutes} onChange={(event) => updateSettings({ focusMinutes: durationValue(event.target.value) })} />
+            <input type="number" min="1" value={numericValues.focusMinutes} onChange={(event) => updateNumericSetting('focusMinutes', event.target.value)} />
           </label>
           <label>
             <span>{t('settings.shortBreakMinutes')}</span>
-            <input type="number" min="1" value={settings.shortBreakMinutes} onChange={(event) => updateSettings({ shortBreakMinutes: durationValue(event.target.value) })} />
+            <input type="number" min="1" value={numericValues.shortBreakMinutes} onChange={(event) => updateNumericSetting('shortBreakMinutes', event.target.value)} />
           </label>
           <label>
             <span>{t('settings.longBreakMinutes')}</span>
-            <input type="number" min="1" value={settings.longBreakMinutes} onChange={(event) => updateSettings({ longBreakMinutes: durationValue(event.target.value) })} />
+            <input type="number" min="1" value={numericValues.longBreakMinutes} onChange={(event) => updateNumericSetting('longBreakMinutes', event.target.value)} />
           </label>
           <label>
             <span>{t('settings.rounds')}</span>
-            <input type="number" min="1" value={settings.roundsBeforeLongBreak} onChange={(event) => updateSettings({ roundsBeforeLongBreak: durationValue(event.target.value) })} />
+            <input type="number" min="1" value={numericValues.roundsBeforeLongBreak} onChange={(event) => updateNumericSetting('roundsBeforeLongBreak', event.target.value)} />
           </label>
           <label className="settings-screen__toggle">
             <input type="checkbox" checked={settings.autoStartNext} onChange={(event) => updateSettings({ autoStartNext: event.target.checked })} />

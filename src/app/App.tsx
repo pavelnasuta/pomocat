@@ -35,7 +35,8 @@ export function App() {
     updateAppData({ ...appData, settings })
   }
 
-  function clearData() {
+  async function clearData() {
+    await timerController.reset()
     clearAppData(localStorage)
     setAppData(loadAppData(localStorage))
     setActiveSection('timer')

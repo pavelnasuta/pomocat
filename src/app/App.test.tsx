@@ -1,8 +1,52 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { vi } from 'vitest'
 import { loadAppData, saveAppData } from '../data/storage'
 import { App } from './App'
 
+const deviceMocks = vi.hoisted(() => ({
+  audio: {
+    select: vi.fn().mockResolvedValue(undefined),
+    setVolume: vi.fn(),
+    start: vi.fn().mockResolvedValue('playing'),
+    stop: vi.fn(),
+  },
+  wakeLock: {
+    acquire: vi.fn().mockResolvedValue('active'),
+    release: vi.fn().mockResolvedValue(undefined),
+  },
+}))
+
+vi.mock('../device/audio', () => ({
+  AudioController: class {
+    select = deviceMocks.audio.select
+    setVolume = deviceMocks.audio.setVolume
+    start = deviceMocks.audio.start
+    stop = deviceMocks.audio.stop
+  },
+}))
+
+vi.mock('../device/wakeLock', () => ({
+  WakeLockController: class {
+    acquire = deviceMocks.wakeLock.acquire
+    release = deviceMocks.wakeLock.release
+  },
+}))
+
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise
+  })
+  return { promise, resolve }
+}
+
 beforeEach(() => {
+  vi.clearAllMocks()
+  deviceMocks.audio.select.mockResolvedValue(undefined)
+  deviceMocks.audio.start.mockResolvedValue('playing')
+  deviceMocks.wakeLock.acquire.mockResolvedValue('active')
+  deviceMocks.wakeLock.release.mockResolvedValue(undefined)
   localStorage.clear()
   const data = loadAppData(localStorage)
   data.settings.locale = 'ru'
@@ -66,4 +110,37 @@ test('clears storage only after confirmation and returns to onboarding', async (
   expect(screen.getByRole('heading')).toHaveTextContent(/Как тебя зовут\?|What is your name\?/)
   expect(loadAppData(localStorage).history).toEqual([])
   expect(loadAppData(localStorage).settings.childName).toBeUndefined()
+})
+
+test('clears active focus resources before showing onboarding', async () => {
+  const data = loadAppData(localStorage)
+  data.settings.childName = 'Маша'
+  data.settings.selectedSound = 'rain'
+  data.settings.keepScreenAwake = true
+  saveAppData(localStorage, data)
+  const release = deferred<void>()
+  deviceMocks.wakeLock.release.mockImplementation(() => release.promise)
+  const user = userEvent.setup()
+
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Начать' }))
+  await waitFor(() => {
+    expect(deviceMocks.audio.start).toHaveBeenCalledOnce()
+    expect(deviceMocks.wakeLock.acquire).toHaveBeenCalledOnce()
+  })
+
+  await user.click(screen.getByRole('button', { name: 'Настройки' }))
+  await user.click(screen.getByRole('button', { name: 'Очистить все данные' }))
+  await user.click(screen.getByRole('button', { name: 'Да, очистить данные' }))
+
+  await waitFor(() => {
+    expect(deviceMocks.audio.stop).toHaveBeenCalledOnce()
+    expect(deviceMocks.wakeLock.release).toHaveBeenCalledOnce()
+  })
+  expect(screen.queryByRole('heading', { name: /Как тебя зовут\?|What is your name\?/ })).not.toBeInTheDocument()
+
+  release.resolve(undefined)
+
+  expect(await screen.findByRole('heading', { name: /Как тебя зовут\?|What is your name\?/ })).toBeInTheDocument()
+  expect(loadAppData(localStorage).activeSession).toBeUndefined()
 })
