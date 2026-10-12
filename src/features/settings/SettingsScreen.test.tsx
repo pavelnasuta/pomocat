@@ -107,17 +107,16 @@ test('requires permission from the explicit notification setting action', async 
   expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ notificationsEnabled: true }))
 })
 
-test('updates notifications, animation, and wake lock preferences', async () => {
+test('updates notifications and wake lock preferences without showing a mascot animation toggle', async () => {
   const { onChange } = renderSettings()
   const user = userEvent.setup()
 
+  expect(screen.queryByLabelText('Анимация котика')).not.toBeInTheDocument()
   await user.click(screen.getByLabelText('Показывать уведомления'))
-  await user.click(screen.getByLabelText('Анимация котика'))
   await user.click(screen.getByLabelText('Не выключать экран во время фокуса'))
 
   expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({
     notificationsEnabled: true,
-    animationsEnabled: false,
     keepScreenAwake: true,
   }))
 })

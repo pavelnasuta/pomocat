@@ -122,10 +122,6 @@ export function SettingsScreen({ data, onChange, onClearData, onRequestNotificat
             <span>{t('settings.notifications')}</span>
           </label>
           <label className="settings-screen__toggle">
-            <input type="checkbox" checked={settings.animationsEnabled} onChange={(event) => updateSettings({ animationsEnabled: event.target.checked })} />
-            <span>{t('settings.animations')}</span>
-          </label>
-          <label className="settings-screen__toggle">
             <input type="checkbox" checked={settings.keepScreenAwake} onChange={(event) => updateSettings({ keepScreenAwake: event.target.checked })} />
             <span>{t('settings.wakeLock')}</span>
           </label>

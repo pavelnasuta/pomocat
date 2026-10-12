@@ -205,16 +205,15 @@ input:focus-visible {
   background: var(--color-surface);
 }
 
-.timer-screen__mascot {
+.timer-screen__actions {
   display: grid;
   min-height: 0;
   place-items: center;
   align-content: center;
   gap: 12px;
-  overflow: hidden;
 }
 
-.timer-screen__mascot p {
+.timer-screen__actions p {
   margin: 0;
   color: var(--color-terracotta);
   font-size: 0.875rem;

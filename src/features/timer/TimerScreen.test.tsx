@@ -37,22 +37,21 @@ test('renders the active focus timer and pauses it from the primary action', asy
 
   expect(screen.getByText('24:00')).toBeInTheDocument()
   expect(screen.getByDisplayValue('Math')).toBeInTheDocument()
-  expect(screen.getByTestId('mascot')).toHaveAttribute('data-animated', 'true')
+  expect(screen.queryByTestId('mascot')).not.toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Пауза' }))
 
   expect(controller.pause).toHaveBeenCalledTimes(1)
 })
 
-test('uses distinct visual poses for focus, pause, and break', () => {
+test('keeps the timer screen mascot-free in every phase', () => {
   const { rerender } = render(<TimerScreen controller={controllerFor('focus')} />)
-  expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
+  expect(screen.queryByTestId('mascot')).not.toBeInTheDocument()
 
   rerender(<TimerScreen controller={controllerFor('paused')} />)
-  expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'pause')
+  expect(screen.queryByTestId('mascot')).not.toBeInTheDocument()
 
   rerender(<TimerScreen controller={controllerFor('shortBreak')} />)
-  expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'stretch')
-  expect(screen.getByTestId('mascot')).toHaveAttribute('data-animated', 'false')
+  expect(screen.queryByTestId('mascot')).not.toBeInTheDocument()
 })
 
 test('renders English paused controls and forwards task edits', async () => {

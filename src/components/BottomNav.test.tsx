@@ -17,8 +17,11 @@ test('changes to the selected navigation section', async () => {
   render(<BottomNav active="timer" locale="ru" onChange={onChange} />)
 
   expect(screen.getByTestId('nav-icon-timer')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByTestId('nav-icon-timer')).toHaveClass('lucide-timer')
   expect(screen.getByTestId('nav-icon-stats')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByTestId('nav-icon-stats')).toHaveClass('lucide-chart-no-axes-column')
   expect(screen.getByTestId('nav-icon-settings')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByTestId('nav-icon-settings')).toHaveClass('lucide-settings')
 
   await user.click(screen.getByRole('button', { name: 'Статистика' }))
 
