@@ -11,7 +11,7 @@ test('renders a visible localized volume label and native range input', () => {
   expect(screen.getByLabelText('Громкость: 50%')).toHaveAttribute('max', '100')
 })
 
-test('selects a sound and changes the persisted volume fraction', async () => {
+test('offers only rain and white noise plus the silent option', async () => {
   const onSelect = vi.fn()
   const onVolumeChange = vi.fn()
   const user = userEvent.setup()
@@ -19,10 +19,16 @@ test('selects a sound and changes the persisted volume fraction', async () => {
     <SoundSettings selectedSound="none" volume={0.5} onSelect={onSelect} onVolumeChange={onVolumeChange} />,
   )
 
-  await user.selectOptions(screen.getByLabelText('Фоновый звук'), 'ocean')
+  expect(screen.getByLabelText('Фоновый звук')).toHaveValue('none')
+  expect(Array.from(screen.getByLabelText('Фоновый звук').querySelectorAll('option')).map((option) => option.value)).toEqual([
+    'none',
+    'rain',
+    'whiteNoise',
+  ])
+  await user.selectOptions(screen.getByLabelText('Фоновый звук'), 'whiteNoise')
   fireEvent.change(screen.getByLabelText('Громкость: 50%'), { target: { value: '52' } })
 
-  expect(onSelect).toHaveBeenCalledWith('ocean')
+  expect(onSelect).toHaveBeenCalledWith('whiteNoise')
   expect(onVolumeChange).toHaveBeenLastCalledWith(0.52)
 })
 

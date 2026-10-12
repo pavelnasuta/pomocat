@@ -171,28 +171,50 @@ input:focus-visible {
 }
 
 .timer-screen__status {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
   text-align: center;
 }
 
 .timer-screen__status p {
   margin: 0;
   color: var(--color-terracotta);
+  font-size: clamp(1rem, 4vw, 1.25rem);
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .timer-screen__status output {
   display: block;
-  margin-top: 4px;
   font-size: clamp(3rem, 18vw, 6rem);
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   line-height: 1;
 }
 
+.timer-screen__progress {
+  width: min(100%, 280px);
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-terracotta), transparent 82%);
+}
+
+.timer-screen__progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-terracotta);
+  transition: width 250ms linear;
+}
+
 .timer-screen__task {
   display: grid;
+  justify-items: center;
   gap: 6px;
   font-weight: 600;
+  text-align: center;
 }
 
 .timer-screen__task input {
@@ -203,6 +225,7 @@ input:focus-visible {
   border-radius: 12px;
   color: var(--color-dark-blue);
   background: var(--color-surface);
+  text-align: center;
 }
 
 .timer-screen__actions {
@@ -219,12 +242,24 @@ input:focus-visible {
   font-size: 0.875rem;
 }
 
-.timer-screen__finish {
+.timer-screen__reset,
+.timer-screen__primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.timer-screen__reset {
   border: 1px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-dark-blue);
   background: var(--color-surface);
   font-weight: 700;
+}
+
+.timer-screen__button-icon {
+  flex: none;
 }
 
 .timer-screen__primary {
@@ -394,7 +429,7 @@ input:focus-visible {
     font-size: 3rem;
   }
 
-  .timer-screen__mascot .mascot {
+  .timer-screen__actions .mascot {
     display: none;
   }
 }
@@ -451,7 +486,7 @@ input:focus-visible {
 }
 
 .mascot {
-  width: min(180px, 44vw);
+  width: min(234px, 57vw);
   color: var(--color-terracotta);
 }
 

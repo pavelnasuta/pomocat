@@ -31,6 +31,23 @@ test('saves data that can be loaded again', () => {
   expect(loadAppData(localStorage)).toEqual(data)
 })
 
+test('normalizes no-longer-offered sound choices to silence', () => {
+  localStorage.setItem(
+    'pomokitty:data:v1',
+    JSON.stringify({
+      version: 1,
+      settings: {
+        locale: 'ru', focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, roundsBeforeLongBreak: 4,
+        autoStartNext: false, animationsEnabled: true, notificationsEnabled: false, keepScreenAwake: false,
+        selectedSound: 'forest', soundVolume: 0.5,
+      },
+      history: [],
+    }),
+  )
+
+  expect(loadAppData(localStorage).settings.selectedSound).toBe('none')
+})
+
 test('clears saved data', () => {
   localStorage.setItem('pomokitty:data:v1', JSON.stringify({ version: 1 }))
 

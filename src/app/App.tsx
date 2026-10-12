@@ -74,8 +74,7 @@ export function App() {
 
       <div className="app-shell__content">
         {activeSection === 'timer' && (
-          <section className="app-section app-section--timer" aria-labelledby="timer-section-title">
-            <h1 id="timer-section-title">{t('navigation.timer')}</h1>
+          <section className="app-section app-section--timer" aria-label={t('navigation.timer')}>
             <TimerScreen controller={timerController} />
           </section>
         )}

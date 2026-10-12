@@ -1,10 +1,7 @@
 import type { SoundId } from '../domain/types'
 
-const soundFiles: Record<Exclude<SoundId, 'none'>, string> = {
+const soundFiles: Partial<Record<Exclude<SoundId, 'none'>, string>> = {
   rain: 'rain.mp3',
-  forest: 'forest.mp3',
-  fireplace: 'fireplace.mp3',
-  ocean: 'ocean.mp3',
   whiteNoise: 'white-noise.mp3',
 }
 
@@ -23,7 +20,13 @@ export class AudioController {
       return
     }
 
-    this.audio = this.createAudio(`${import.meta.env.BASE_URL}sounds/${soundFiles[sound]}`)
+    const soundFile = soundFiles[sound]
+    if (!soundFile) {
+      this.audio = undefined
+      return
+    }
+
+    this.audio = this.createAudio(`${import.meta.env.BASE_URL}sounds/${soundFile}`)
     this.audio.loop = true
   }
 

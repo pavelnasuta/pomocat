@@ -18,6 +18,7 @@ const soundIds: SoundId[] = [
   'whiteNoise',
   'none',
 ]
+const offeredSoundIds: SoundId[] = ['rain', 'whiteNoise', 'none']
 const phases: Phase[] = ['idle', 'focus', 'shortBreak', 'longBreak', 'paused']
 const historyPhases: SessionHistoryItem['phase'][] = [
   'focus',
@@ -148,7 +149,14 @@ export function loadAppData(storage: Storage): AppData {
     const parsedData: unknown = JSON.parse(savedData)
     if (!isAppData(parsedData)) return defaultAppData()
     const { activeSession, ...safeData } = parsedData
-    return isActiveSession(activeSession) ? { ...safeData, activeSession } : safeData
+    const normalizedData = {
+      ...safeData,
+      settings: {
+        ...safeData.settings,
+        selectedSound: offeredSoundIds.includes(safeData.settings.selectedSound) ? safeData.settings.selectedSound : 'none',
+      },
+    }
+    return isActiveSession(activeSession) ? { ...normalizedData, activeSession } : normalizedData
   } catch {
     return defaultAppData()
   }

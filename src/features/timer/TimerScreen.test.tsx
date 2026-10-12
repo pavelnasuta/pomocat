@@ -36,8 +36,13 @@ test('renders the active focus timer and pauses it from the primary action', asy
   render(<TimerScreen controller={controller} />)
 
   expect(screen.getByText('24:00')).toBeInTheDocument()
-  expect(screen.getByDisplayValue('Math')).toBeInTheDocument()
+  expect(screen.getByText('Время работать')).toBeInTheDocument()
+  expect(screen.queryByRole('heading', { name: 'Таймер' })).not.toBeInTheDocument()
+  expect(screen.queryByText('Фокус')).not.toBeInTheDocument()
+  expect(screen.getByRole('progressbar', { name: 'Прогресс этапа' })).toHaveAttribute('aria-valuenow', '4')
+  expect(screen.getByLabelText('Что делаем?')).toHaveDisplayValue('Math')
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
+  expect(screen.getByRole('button', { name: 'Пауза' })).toContainElement(document.querySelector('.lucide-pause'))
   await user.click(screen.getByRole('button', { name: 'Пауза' }))
 
   expect(controller.pause).toHaveBeenCalledTimes(1)
@@ -51,6 +56,7 @@ test('uses the mascot collection across timer phases', () => {
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'pause')
 
   rerender(<TimerScreen controller={controllerFor('shortBreak')} />)
+  expect(screen.getByText('Время отдыхать')).toBeInTheDocument()
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'stretch')
 
   rerender(<TimerScreen controller={controllerFor('longBreak')} />)
@@ -63,7 +69,7 @@ test('renders English paused controls and forwards task edits', async () => {
 
   render(<TimerScreen controller={controller} />)
 
-  const task = screen.getByLabelText('Task')
+  const task = screen.getByLabelText('What are we doing?')
   fireEvent.change(task, { target: { value: 'Science' } })
   await user.click(screen.getByRole('button', { name: 'Resume' }))
 
@@ -71,14 +77,17 @@ test('renders English paused controls and forwards task edits', async () => {
   expect(controller.resume).toHaveBeenCalledOnce()
 })
 
-test('renders the English finish control for an active phase', async () => {
+test('resets the whole cycle from the localized completion control', async () => {
   const controller = controllerFor('focus', 'en')
   const user = userEvent.setup()
 
   render(<TimerScreen controller={controller} />)
-  await user.click(screen.getByRole('button', { name: 'Finish phase' }))
+  const completion = screen.getByRole('button', { name: "I'm done!" })
+  expect(completion.querySelector('.lucide-check')).toBeInTheDocument()
+  await user.click(completion)
 
-  expect(controller.finishCurrentPhase).toHaveBeenCalledOnce()
+  expect(controller.reset).toHaveBeenCalledOnce()
+  expect(controller.finishCurrentPhase).not.toHaveBeenCalled()
 })
 
 test('shows a short localized audio status while keeping timer controls available', () => {

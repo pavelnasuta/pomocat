@@ -55,11 +55,14 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
   })
 }, 15_000)
 
-test('precaches every local MP3 sound in the service worker', () => {
+test('precaches only rain and white-noise audio in the service worker', () => {
   const { serviceWorker } = buildPwa()
 
-  for (const sound of ['rain', 'forest', 'fireplace', 'ocean', 'white-noise']) {
+  for (const sound of ['rain', 'white-noise']) {
     expect(serviceWorker).toContain(`sounds/${sound}.mp3`)
+  }
+  for (const removedSound of ['forest', 'fireplace', 'ocean']) {
+    expect(serviceWorker).not.toContain(`sounds/${removedSound}.mp3`)
   }
 })
 

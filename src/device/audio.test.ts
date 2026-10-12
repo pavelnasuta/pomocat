@@ -73,7 +73,7 @@ test('plays the selected audio element', async () => {
     .mockReturnValueOnce(fallbackAudio as unknown as HTMLAudioElement)
   const controller = new AudioController(createAudio)
 
-  await controller.select('ocean')
+  await controller.select('whiteNoise')
   await expect(controller.start()).resolves.toBe('playing')
 
   expect(selectedAudio.play).toHaveBeenCalledOnce()
@@ -84,7 +84,7 @@ test('stops and resets the selected audio at the end of a phase', async () => {
   const audio = { currentTime: 48, loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
   const controller = new AudioController(() => audio as unknown as HTMLAudioElement)
 
-  await controller.select('fireplace')
+  await controller.select('rain')
   controller.stop()
 
   expect(audio.pause).toHaveBeenCalledOnce()
@@ -101,7 +101,7 @@ test('stops and replaces audio when the selected sound changes', async () => {
   const controller = new AudioController(createAudio)
 
   await controller.select('rain')
-  await controller.select('forest')
+  await controller.select('whiteNoise')
 
   expect(previousAudio.pause).toHaveBeenCalledOnce()
   expect(previousAudio.currentTime).toBe(0)

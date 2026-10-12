@@ -39,13 +39,13 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
     const task = timerScreen.querySelector('input')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
-    const finish = timerScreen.querySelector('.timer-screen__finish')
+    const reset = timerScreen.querySelector('.timer-screen__reset')
     const navigation = document.querySelector('.bottom-nav')
-    if (!task || !primaryAction || !finish || !navigation) throw new Error('Timer controls are missing')
+    if (!task || !primaryAction || !reset || !navigation) throw new Error('Timer controls are missing')
 
     const taskBox = task.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
-    const finishBox = finish.getBoundingClientRect()
+    const resetBox = reset.getBoundingClientRect()
     const navigationBox = navigation.getBoundingClientRect()
     return {
       pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
@@ -53,8 +53,8 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
       taskBottom: taskBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
-      finishTop: finishBox.top,
-      finishBottom: finishBox.bottom,
+      resetTop: resetBox.top,
+      resetBottom: resetBox.bottom,
       navigationTop: navigationBox.top,
       viewportHeight: window.innerHeight,
     }
@@ -63,7 +63,7 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
   expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
-  expect(geometry.finishBottom).toBeLessThanOrEqual(geometry.primaryTop)
+  expect(geometry.resetBottom).toBeLessThanOrEqual(geometry.primaryTop)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.navigationTop)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
 })

@@ -79,13 +79,13 @@ test('first mobile visit stores the Russian child name and keeps the timer insid
   await expect(page.getByText('Привет, Маша')).toBeVisible()
 })
 
-test('timer resumes from the persisted deadline after pause and reload, then records focus statistics at 412 by 915', async ({ page }) => {
+test('timer resumes from the persisted deadline after pause and reload, then reset returns to the start at 412 by 915', async ({ page }) => {
   await page.setViewportSize({ width: 412, height: 915 })
   await page.goto('/pomokitty/')
   await page.getByLabel('Как тебя зовут?').fill('Маша')
   await page.getByRole('button', { name: 'Продолжить' }).click()
 
-  await page.getByLabel('Задача').fill('Математика')
+  await page.getByLabel('Что делаем?').fill('Математика')
   await page.getByRole('button', { name: 'Начать' }).click()
   await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible()
 
@@ -128,12 +128,10 @@ test('timer resumes from the persisted deadline after pause and reload, then rec
   expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
 
-  await page.getByRole('button', { name: 'Завершить этап' }).click()
-  await page.getByRole('button', { name: 'Статистика' }).click()
-  const todayStats = page.getByTestId('stats-today')
-  await expect(todayStats).toContainText(/2[0-4] мин/)
-  await expect(todayStats).not.toContainText('25 мин')
-  await expect(page.getByRole('list', { name: 'История сессий' })).toContainText('Фокус')
+  await page.getByRole('button', { name: 'Я сделал!' }).click()
+  await expect(page.getByRole('button', { name: 'Начать' })).toBeVisible()
+  await expect(page.getByLabel('Что делаем?')).toHaveValue('')
+  await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}').activeSession)).toBeUndefined()
 })
 
 test('settings persist sound and language choices, respect reduced motion, and require clear-data confirmation', async ({ page }) => {
@@ -249,16 +247,23 @@ test('restores selected audio and focus wake lock across automatic transitions',
 
   await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 1, wakeRequests: 1, wakeReleases: 0 })
   await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(60_000))
-  await expect(page.locator('.timer-screen__status p')).toHaveText('Короткий перерыв')
+  await expect(page.getByTestId('mascot')).toHaveAttribute('data-pose', 'stretch')
   await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 2, wakeRequests: 1, wakeReleases: 1 })
 
   await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(60_000))
-  await expect(page.locator('.timer-screen__status p')).toHaveText('Фокус')
+  await expect(page.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
   await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 3, wakeRequests: 2, wakeReleases: 1 })
 })
 
 test('requests notification permission only from settings and sends one completion notification', async ({ page }) => {
   await page.addInitScript(() => {
+    let now = 1_000_000
+    Date.now = () => now
+    Object.defineProperty(window, 'advancePomokittyClock', {
+      configurable: true,
+      value: (milliseconds: number) => { now += milliseconds },
+    })
+
     class TestNotification {
       static permission = 'default'
       static requestPermission = async () => {
@@ -279,7 +284,7 @@ test('requests notification permission only from settings and sends one completi
   await page.getByLabel('Показывать уведомления').check()
   await page.getByRole('button', { name: 'Таймер' }).click()
   await page.getByRole('button', { name: 'Начать' }).click()
-  await page.getByRole('button', { name: 'Завершить этап' }).click()
+  await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(25 * 60_000))
   await expect.poll(() => page.evaluate(() => (window as Window & { notices?: unknown[] }).notices?.length ?? 0)).toBe(1)
 })
 

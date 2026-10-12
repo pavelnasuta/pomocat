@@ -1,3 +1,4 @@
+import { Check, Pause, Play } from 'lucide-react'
 import { Mascot, type MascotPose } from '../../components/Mascot'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { PomodoroController } from './usePomodoroController'
@@ -13,10 +14,9 @@ function formatRemainingTime(remainingMs: number): string {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
-function phaseLabel(phase: PomodoroController['view']['phase']): 'timer.focus' | 'timer.shortBreak' | 'timer.longBreak' {
-  if (phase === 'shortBreak') return 'timer.shortBreak'
-  if (phase === 'longBreak') return 'timer.longBreak'
-  return 'timer.focus'
+function progressPercent(remainingMs: number, totalMs: number): number {
+  if (totalMs <= 0) return 0
+  return Math.round(Math.min(1, Math.max(0, 1 - remainingMs / totalMs)) * 100)
 }
 
 function mascotPose(controller: PomodoroController): MascotPose {
@@ -34,18 +34,27 @@ export function TimerScreen({ controller }: TimerScreenProps) {
     controller.view.phase === 'focus' ||
     controller.view.phase === 'shortBreak' ||
     controller.view.phase === 'longBreak'
-  const primaryAction =
-    controller.view.phase === 'paused'
-      ? { label: t('timer.resume'), action: controller.resume }
-      : isActive
-        ? { label: t('timer.pause'), action: controller.pause }
-        : { label: t('timer.start'), action: controller.start }
+  const progress = progressPercent(controller.view.remainingMs, controller.view.totalMs)
+  const isRest = controller.view.phase === 'shortBreak' || controller.view.phase === 'longBreak'
+  const phaseLabel = t(isRest ? 'timer.restTime' : 'timer.workTime')
+  const isResettable = controller.view.phase !== 'idle'
+  const PrimaryIcon = controller.view.phase === 'paused' || !isActive ? Play : Pause
 
   return (
     <section className="timer-screen" aria-label={t('navigation.timer')}>
       <header className="timer-screen__status">
-        <p>{t(phaseLabel(controller.view.phase))}</p>
+        <p>{phaseLabel}</p>
         <output aria-live="polite">{formatRemainingTime(controller.view.remainingMs)}</output>
+        <div
+          className="timer-screen__progress"
+          role="progressbar"
+          aria-label={t('timer.progress')}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+        >
+          <span style={{ width: `${progress}%` }} />
+        </div>
       </header>
 
       <label className="timer-screen__task">
@@ -62,15 +71,21 @@ export function TimerScreen({ controller }: TimerScreenProps) {
         />
         {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
         {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}
-        {isActive && (
-          <button type="button" className="timer-screen__finish" onClick={() => void controller.finishCurrentPhase()}>
-            {t('timer.finishPhase')}
+        {isResettable && (
+          <button type="button" className="timer-screen__reset" onClick={() => void controller.reset()}>
+            <Check aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
+            <span>{t('timer.complete')}</span>
           </button>
         )}
       </div>
 
-      <button type="button" className="timer-screen__primary" onClick={() => void primaryAction.action()}>
-        {primaryAction.label}
+      <button
+        type="button"
+        className="timer-screen__primary"
+        onClick={() => void (controller.view.phase === 'paused' ? controller.resume() : isActive ? controller.pause() : controller.start())}
+      >
+        <PrimaryIcon aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
+        <span>{controller.view.phase === 'paused' ? t('timer.resume') : isActive ? t('timer.pause') : t('timer.start')}</span>
       </button>
     </section>
   )
