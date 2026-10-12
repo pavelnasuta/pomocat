@@ -373,6 +373,33 @@ input:focus-visible {
   font-size: 0.8125rem;
 }
 
+@media (max-height: 38rem) {
+  .app-shell__header {
+    padding-block: max(8px, env(safe-area-inset-top)) 8px;
+  }
+
+  .app-section {
+    padding-block: 8px;
+  }
+
+  .app-section--timer,
+  .timer-screen {
+    gap: 8px;
+  }
+
+  .app-section h1 {
+    font-size: 1.4rem;
+  }
+
+  .timer-screen__status output {
+    font-size: 3rem;
+  }
+
+  .timer-screen__mascot .mascot {
+    display: none;
+  }
+}
+
 .bottom-nav {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -1,8 +1,14 @@
 import { expect, test } from '@playwright/test'
 
-test.use({ viewport: { width: 375, height: 667 } })
-
-test('keeps the timer task and primary action visible in separate mobile areas without page scrolling', async ({ page }) => {
+for (const viewport of [
+  { width: 320, height: 568 },
+  { width: 360, height: 800 },
+  { width: 393, height: 852 },
+  { width: 375, height: 667 },
+  { width: 412, height: 915 },
+]) {
+test(`keeps every active timer control and navigation non-overlapping at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  await page.setViewportSize(viewport)
   await page.addInitScript(() => {
     localStorage.setItem(
       'pomokitty:data:v1',
@@ -28,20 +34,28 @@ test('keeps the timer task and primary action visible in separate mobile areas w
   })
 
   await page.goto('/')
+  await page.getByRole('button', { name: 'Start' }).click()
 
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
     const task = timerScreen.querySelector('input')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
-    if (!task || !primaryAction) throw new Error('Timer controls are missing')
+    const finish = timerScreen.querySelector('.timer-screen__finish')
+    const navigation = document.querySelector('.bottom-nav')
+    if (!task || !primaryAction || !finish || !navigation) throw new Error('Timer controls are missing')
 
     const taskBox = task.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
+    const finishBox = finish.getBoundingClientRect()
+    const navigationBox = navigation.getBoundingClientRect()
     return {
       pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
       timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
       taskBottom: taskBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
+      finishTop: finishBox.top,
+      finishBottom: finishBox.bottom,
+      navigationTop: navigationBox.top,
       viewportHeight: window.innerHeight,
     }
   })
@@ -49,5 +63,8 @@ test('keeps the timer task and primary action visible in separate mobile areas w
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
   expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
+  expect(geometry.finishBottom).toBeLessThanOrEqual(geometry.primaryTop)
+  expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.navigationTop)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
 })
+}
