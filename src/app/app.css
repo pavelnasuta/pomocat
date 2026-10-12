@@ -452,116 +452,71 @@ input:focus-visible {
 }
 
 .mascot {
-  position: relative;
-  width: 180px;
-  height: 150px;
+  width: min(180px, 44vw);
+  color: var(--color-terracotta);
 }
 
-.mascot__body {
-  position: absolute;
-  right: 18px;
-  bottom: 4px;
-  width: 118px;
-  height: 82px;
-  border-radius: 58% 58% 40% 40%;
-  background: var(--color-terracotta);
-  transform-origin: bottom center;
+.mascot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
 }
 
-.mascot__tail {
-  position: absolute;
-  right: 0;
-  bottom: 30px;
-  width: 68px;
-  height: 24px;
-  border: 13px solid var(--color-terracotta);
-  border-left: 0;
-  border-radius: 0 42px 42px 0;
-  transform-origin: left center;
-}
-
-.mascot__head {
-  position: absolute;
-  left: 19px;
-  top: 8px;
-  width: 104px;
-  height: 92px;
-  border-radius: 46% 46% 42% 42%;
-  background: var(--color-terracotta);
-}
-
-.mascot__ear {
-  position: absolute;
-  top: -17px;
-  width: 35px;
-  height: 43px;
-  border-radius: 10px 28px 10px 28px;
-  background: var(--color-terracotta);
-  transform-origin: bottom center;
-}
-
-.mascot__ear--left {
-  left: 7px;
-  transform: rotate(-24deg);
-}
-
-.mascot__ear--right {
-  right: 7px;
-  transform: scaleX(-1) rotate(-24deg);
-}
-
-.mascot__face {
-  position: absolute;
-  left: 50%;
-  bottom: 18px;
-  width: 54px;
-  height: 28px;
-  transform: translateX(-50%);
-}
-
-.mascot__eye {
-  position: absolute;
-  top: 0;
-  width: 10px;
-  height: 13px;
-  border-radius: 50%;
-  background: var(--color-dark-blue);
+.mascot__body,
+.mascot__head,
+.mascot__tail,
+.mascot__paws,
+.mascot__eyes,
+.mascot__notebook,
+.mascot__spark {
+  transform-box: fill-box;
   transform-origin: center;
 }
 
-.mascot__eye--left {
-  left: 6px;
+.mascot--pause .mascot__eyes {
+  transform: translateY(2px);
 }
 
-.mascot__eye--right {
-  right: 6px;
+.mascot--pause .mascot__mouth {
+  transform: translateY(2px);
 }
 
-.mascot__nose {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 9px;
-  height: 7px;
-  border-radius: 50% 50% 55% 55%;
-  background: var(--color-mint);
-  transform: translateX(-50%);
+.mascot--stretch .mascot__body {
+  transform: translateY(7px) scale(1.05, 0.9);
+}
+
+.mascot--stretch .mascot__head {
+  transform: translateY(-4px) rotate(-4deg);
+}
+
+.mascot--stretch .mascot__tail {
+  transform: rotate(-20deg);
+}
+
+.mascot--celebrate .mascot__paws {
+  transform: translateY(-14px);
 }
 
 .mascot--active .mascot__body {
   animation: mascot-breathe 2.8s ease-in-out infinite;
 }
 
-.mascot--active .mascot__eye {
+.mascot--active .mascot__eyes {
   animation: mascot-blink 5s step-end infinite;
-}
-
-.mascot--active .mascot__ear {
-  animation: mascot-ear-twitch 3.4s ease-in-out infinite;
 }
 
 .mascot--active .mascot__tail {
   animation: mascot-tail-sway 2.4s ease-in-out infinite;
+}
+
+.mascot--active .mascot__paws,
+.mascot--active .mascot__pencil {
+  animation: mascot-write 1.2s ease-in-out infinite;
+}
+
+.mascot--celebrate.mascot--active .mascot__spark {
+  animation: mascot-spark 0.75s ease-out infinite;
 }
 
 @keyframes mascot-breathe {
@@ -571,7 +526,7 @@ input:focus-visible {
   }
 
   50% {
-    transform: scale(1.025, 0.97);
+    transform: scale(1.025, 0.975);
   }
 }
 
@@ -587,18 +542,6 @@ input:focus-visible {
   }
 }
 
-@keyframes mascot-ear-twitch {
-  0%,
-  82%,
-  100% {
-    translate: 0 0;
-  }
-
-  88% {
-    translate: 0 -3px;
-  }
-}
-
 @keyframes mascot-tail-sway {
   0%,
   100% {
@@ -607,6 +550,30 @@ input:focus-visible {
 
   50% {
     transform: rotate(9deg);
+  }
+}
+
+@keyframes mascot-write {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+
+  50% {
+    transform: translate(2px, 1px);
+  }
+}
+
+@keyframes mascot-spark {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
   }
 }
 
@@ -628,9 +595,11 @@ input:focus-visible {
   }
 
   .mascot--active .mascot__body,
-  .mascot--active .mascot__eye,
-  .mascot--active .mascot__ear,
-  .mascot--active .mascot__tail {
+  .mascot--active .mascot__eyes,
+  .mascot--active .mascot__tail,
+  .mascot--active .mascot__paws,
+  .mascot--active .mascot__pencil,
+  .mascot--active .mascot__spark {
     animation: none;
   }
 }

@@ -43,9 +43,15 @@ test('renders the active focus timer and pauses it from the primary action', asy
   expect(controller.pause).toHaveBeenCalledTimes(1)
 })
 
-test('keeps the mascot calm during an active break', () => {
-  render(<TimerScreen controller={controllerFor('shortBreak')} />)
+test('uses distinct visual poses for focus, pause, and break', () => {
+  const { rerender } = render(<TimerScreen controller={controllerFor('focus')} />)
+  expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
 
+  rerender(<TimerScreen controller={controllerFor('paused')} />)
+  expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'pause')
+
+  rerender(<TimerScreen controller={controllerFor('shortBreak')} />)
+  expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'stretch')
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-animated', 'false')
 })
 

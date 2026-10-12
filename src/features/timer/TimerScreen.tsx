@@ -19,6 +19,14 @@ function phaseLabel(phase: PomodoroController['view']['phase']): 'timer.focus' |
   return 'timer.focus'
 }
 
+function mascotPose(controller: PomodoroController): 'rest' | 'work' | 'pause' | 'stretch' | 'celebrate' {
+  if (controller.view.isFinished) return 'celebrate'
+  if (controller.view.phase === 'focus') return 'work'
+  if (controller.view.phase === 'shortBreak' || controller.view.phase === 'longBreak') return 'stretch'
+  if (controller.view.phase === 'paused') return 'pause'
+  return 'rest'
+}
+
 export function TimerScreen({ controller }: TimerScreenProps) {
   const { t } = useTranslation(controller.locale)
   const isActive =
@@ -49,6 +57,7 @@ export function TimerScreen({ controller }: TimerScreenProps) {
           active={controller.view.phase === 'focus'}
           animationsEnabled={controller.animationsEnabled}
           locale={controller.locale}
+          pose={mascotPose(controller)}
         />
         {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
         {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}
