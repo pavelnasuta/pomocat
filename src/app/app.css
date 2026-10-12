@@ -403,23 +403,52 @@ input:focus-visible {
 .bottom-nav {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  padding: 12px 16px max(12px, env(safe-area-inset-bottom));
+  gap: 4px;
+  padding: 8px 12px max(8px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--color-border);
   background: var(--color-surface);
 }
 
 .bottom-nav__button {
-  border-radius: 12px;
-  color: var(--color-dark-blue);
+  display: grid;
+  min-height: 56px;
+  place-items: center;
+  align-content: center;
+  gap: 3px;
+  padding: 5px 4px;
+  border-radius: 14px;
+  color: color-mix(in srgb, var(--color-dark-blue), transparent 25%);
   background: transparent;
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.bottom-nav__icon {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.bottom-nav__label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bottom-nav__button[aria-current='page'] {
   color: var(--color-surface);
   background: var(--color-terracotta);
+  font-weight: 650;
+}
+
+.bottom-nav__button:not([aria-current='page']):hover {
+  color: var(--color-dark-blue);
+  background: color-mix(in srgb, var(--color-terracotta), transparent 92%);
 }
 
 .mascot {

@@ -15,6 +15,11 @@ test('changes to the selected navigation section', async () => {
   const user = userEvent.setup()
 
   render(<BottomNav active="timer" locale="ru" onChange={onChange} />)
+
+  expect(screen.getByTestId('nav-icon-timer')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByTestId('nav-icon-stats')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByTestId('nav-icon-settings')).toHaveAttribute('aria-hidden', 'true')
+
   await user.click(screen.getByRole('button', { name: 'Статистика' }))
 
   expect(onChange).toHaveBeenCalledWith('stats')
