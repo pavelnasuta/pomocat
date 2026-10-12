@@ -23,7 +23,7 @@ export class AudioController {
       return
     }
 
-    this.audio = this.createAudio(`/sounds/${soundFiles[sound]}`)
+    this.audio = this.createAudio(`${import.meta.env.BASE_URL}sounds/${soundFiles[sound]}`)
     this.audio.loop = true
   }
 

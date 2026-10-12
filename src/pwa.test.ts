@@ -80,3 +80,14 @@ test('deploys the built site through the GitHub Pages action chain', () => {
   expect(workflow).toMatch(/path:\s*\.\/dist/)
   expect(workflow).toMatch(/actions\/deploy-pages@/)
 })
+
+test('documents a runnable local production preview command', () => {
+  const readme = readFileSync(`${projectRoot}README.md`, 'utf8')
+  const packageJson = JSON.parse(readFileSync(`${projectRoot}package.json`, 'utf8')) as {
+    scripts?: Record<string, string>
+  }
+
+  expect(readme).toContain('npm run preview')
+  expect(packageJson.scripts?.preview).toBe('vite preview')
+  expect(() => execFileSync('npm', ['run', 'preview', '--', '--help'], { cwd: projectRoot, stdio: 'pipe' })).not.toThrow()
+})

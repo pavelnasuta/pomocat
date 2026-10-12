@@ -25,6 +25,25 @@ test('creates a looping local audio element for the selected sound', async () =>
   expect(audio.loop).toBe(true)
 })
 
+test('resolves selected audio within the Vite Pages base path', async () => {
+  vi.stubEnv('BASE_URL', '/pomokitty/')
+  vi.resetModules()
+
+  try {
+    const { AudioController: PagesAudioController } = await import('./audio')
+    const audio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
+    const createAudio = vi.fn(() => audio as unknown as HTMLAudioElement)
+    const controller = new PagesAudioController(createAudio)
+
+    await controller.select('rain')
+
+    expect(createAudio).toHaveBeenCalledWith('/pomokitty/sounds/rain.mp3')
+  } finally {
+    vi.unstubAllEnvs()
+    vi.resetModules()
+  }
+})
+
 test('clamps the selected audio volume to the browser range', async () => {
   const audio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
   const controller = new AudioController(() => audio as unknown as HTMLAudioElement)

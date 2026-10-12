@@ -37,6 +37,7 @@ npm run preview
 
 - `npm run dev` — локальный сервер разработки.
 - `npm run build` — проверка типов и production-сборка.
+- `npm run preview` — локальная проверка production-сборки.
 - `npm run test` — unit-тесты.
 - `npm run test:coverage` — unit-тесты с покрытием.
 - `npm run test:e2e` — Playwright end-to-end тесты.
