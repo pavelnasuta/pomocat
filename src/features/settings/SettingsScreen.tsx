@@ -7,6 +7,7 @@ export interface SettingsScreenProps {
   data: AppData
   onChange(settings: PomodoroSettings): void
   onClearData(): void
+  onRequestNotifications(): Promise<boolean>
 }
 
 type NumericSetting = 'focusMinutes' | 'shortBreakMinutes' | 'longBreakMinutes' | 'roundsBeforeLongBreak'
@@ -20,7 +21,7 @@ function numericInputs(settings: PomodoroSettings): Record<NumericSetting, strin
   }
 }
 
-export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenProps) {
+export function SettingsScreen({ data, onChange, onClearData, onRequestNotifications }: SettingsScreenProps) {
   const { t } = useTranslation(data.settings.locale)
   const [settings, setSettings] = useState(data.settings)
   const [numericValues, setNumericValues] = useState(() => numericInputs(data.settings))
@@ -37,6 +38,14 @@ export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenPr
     const nextSettings = { ...settings, ...change }
     setSettings(nextSettings)
     onChange(nextSettings)
+  }
+
+  async function updateNotifications(enabled: boolean) {
+    if (!enabled) {
+      updateSettings({ notificationsEnabled: false })
+      return
+    }
+    if (await onRequestNotifications()) updateSettings({ notificationsEnabled: true })
   }
 
   function saveName() {
@@ -68,8 +77,8 @@ export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenPr
           <label>
             <span>{t('settings.locale')}</span>
             <select value={data.settings.locale} onChange={(event) => updateSettings({ locale: event.target.value as PomodoroSettings['locale'] })}>
-              <option value="ru">Русский</option>
-              <option value="en">English</option>
+              <option value="ru">{t('settings.locale.ru')}</option>
+              <option value="en">{t('settings.locale.en')}</option>
             </select>
           </label>
         </fieldset>
@@ -109,7 +118,7 @@ export function SettingsScreen({ data, onChange, onClearData }: SettingsScreenPr
         <fieldset>
           <legend>{t('settings.device')}</legend>
           <label className="settings-screen__toggle">
-            <input type="checkbox" checked={settings.notificationsEnabled} onChange={(event) => updateSettings({ notificationsEnabled: event.target.checked })} />
+            <input type="checkbox" checked={settings.notificationsEnabled} onChange={(event) => void updateNotifications(event.target.checked)} />
             <span>{t('settings.notifications')}</span>
           </label>
           <label className="settings-screen__toggle">

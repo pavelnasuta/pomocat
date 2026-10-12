@@ -28,8 +28,9 @@ function dataWithName(): AppData {
 function renderSettings(data = dataWithName()) {
   const onChange = vi.fn()
   const onClearData = vi.fn()
-  render(<SettingsScreen data={data} onChange={onChange} onClearData={onClearData} />)
-  return { onChange, onClearData }
+  const onRequestNotifications = vi.fn().mockResolvedValue(true)
+  render(<SettingsScreen data={data} onChange={onChange} onClearData={onClearData} onRequestNotifications={onRequestNotifications} />)
+  return { onChange, onClearData, onRequestNotifications }
 }
 
 test('updates and clears a saved child name', async () => {
@@ -91,6 +92,19 @@ test.each([
 
   expect(input).toHaveValue(0)
   expect(onChange).not.toHaveBeenCalled()
+})
+
+test('requires permission from the explicit notification setting action', async () => {
+  const data = dataWithName()
+  const onChange = vi.fn()
+  const onRequestNotifications = vi.fn().mockResolvedValue(false)
+  render(<SettingsScreen data={data} onChange={onChange} onClearData={vi.fn()} onRequestNotifications={onRequestNotifications} />)
+  const user = userEvent.setup()
+
+  await user.click(screen.getByLabelText('Показывать уведомления'))
+
+  expect(onRequestNotifications).toHaveBeenCalledOnce()
+  expect(onChange).not.toHaveBeenCalledWith(expect.objectContaining({ notificationsEnabled: true }))
 })
 
 test('updates notifications, animation, and wake lock preferences', async () => {

@@ -94,3 +94,61 @@ test('uses English defaults for a non-Russian browser language', () => {
     Object.defineProperty(navigator, 'language', languageDescriptor)
   }
 })
+
+test('rejects non-finite and out-of-range persisted settings', () => {
+  localStorage.setItem(
+    'pomokitty:data:v1',
+    JSON.stringify({
+      version: 1,
+      settings: {
+        locale: 'en',
+        focusMinutes: 0,
+        shortBreakMinutes: 5,
+        longBreakMinutes: 15,
+        roundsBeforeLongBreak: 4,
+        autoStartNext: false,
+        animationsEnabled: true,
+        notificationsEnabled: false,
+        keepScreenAwake: false,
+        selectedSound: 'none',
+        soundVolume: 1.5,
+      },
+      history: [],
+    }),
+  )
+
+  expect(loadAppData(localStorage).settings.focusMinutes).toBe(25)
+})
+
+test('discards a malformed active deadline without discarding valid saved settings', () => {
+  const data = {
+    version: 1,
+    settings: {
+      locale: 'en', focusMinutes: 25, shortBreakMinutes: 5, longBreakMinutes: 15, roundsBeforeLongBreak: 4,
+      autoStartNext: false, animationsEnabled: true, notificationsEnabled: false, keepScreenAwake: false,
+      selectedSound: 'none', soundVolume: 0.5,
+    },
+    history: [],
+    activeSession: {
+      phase: 'focus', startedAt: '2026-10-11T12:00:00.000Z', remainingSeconds: 60,
+      completedRounds: 0, targetEndsAt: 'not-a-timestamp', totalMs: 60_000,
+    },
+  }
+  localStorage.setItem('pomokitty:data:v1', JSON.stringify(data))
+
+  const loaded = loadAppData(localStorage)
+  expect(loaded.settings.locale).toBe('en')
+  expect(loaded.activeSession).toBeUndefined()
+})
+
+test('never propagates storage write or clear failures', () => {
+  const failingStorage = {
+    getItem: vi.fn(() => { throw new DOMException('blocked') }),
+    setItem: vi.fn(() => { throw new DOMException('blocked') }),
+    removeItem: vi.fn(() => { throw new DOMException('blocked') }),
+  } as unknown as Storage
+  const data = loadAppData(localStorage)
+
+  expect(saveAppData(failingStorage, data)).toBe(false)
+  expect(clearAppData(failingStorage)).toBe(false)
+})

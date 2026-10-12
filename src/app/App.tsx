@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BottomNav, type NavigationSection } from '../components/BottomNav'
 import { Onboarding } from '../components/Onboarding'
 import { clearAppData, loadAppData, saveAppData } from '../data/storage'
+import { NotificationController } from '../device/notifications'
 import { SettingsScreen } from '../features/settings/SettingsScreen'
 import { StatsScreen } from '../features/stats/StatsScreen'
 import { TimerScreen } from '../features/timer/TimerScreen'
@@ -11,14 +12,29 @@ import { useTranslation } from '../i18n/useTranslation'
 
 export function App() {
   const [appData, setAppData] = useState(() => loadAppData(localStorage))
-  const timerController = usePomodoroController({ appData, onAppDataChange: setAppData })
+  const [unsavedData, setUnsavedData] = useState(false)
+  const notifications = useRef(new NotificationController()).current
+  const timerController = usePomodoroController({
+    appData,
+    notifications,
+    onAppDataChange: setAppData,
+    onPersistenceChange: setUnsavedData,
+  })
   const [activeSection, setActiveSection] = useState<NavigationSection>('timer')
   const effectiveLocale = appData.settings.locale
   const { t } = useTranslation(effectiveLocale)
 
+  useEffect(() => {
+    document.documentElement.lang = effectiveLocale
+  }, [effectiveLocale])
+
   function updateAppData(nextAppData: typeof appData) {
-    saveAppData(localStorage, nextAppData)
+    setUnsavedData(!saveAppData(localStorage, nextAppData))
     setAppData(nextAppData)
+  }
+
+  async function requestNotifications(): Promise<boolean> {
+    return (await notifications.requestPermission()) === 'granted'
   }
 
   function completeOnboarding(name: string) {
@@ -37,7 +53,7 @@ export function App() {
 
   async function clearData() {
     await timerController.reset()
-    clearAppData(localStorage)
+    setUnsavedData(!clearAppData(localStorage))
     setAppData(loadAppData(localStorage))
     setActiveSection('timer')
   }
@@ -53,6 +69,7 @@ export function App() {
         <p className="app-shell__greeting">
           {t('app.greeting')} {appData.settings.childName}
         </p>
+        {unsavedData && <p role="status">{t('app.unsavedData')}</p>}
       </header>
 
       <div className="app-shell__content">
@@ -73,7 +90,7 @@ export function App() {
         {activeSection === 'settings' && (
           <section className="app-section app-section--scroll" aria-labelledby="settings-section-title">
             <h1 id="settings-section-title">{t('navigation.settings')}</h1>
-            <SettingsScreen data={appData} onChange={updateSettings} onClearData={clearData} />
+            <SettingsScreen data={appData} onChange={updateSettings} onClearData={clearData} onRequestNotifications={requestNotifications} />
           </section>
         )}
       </div>

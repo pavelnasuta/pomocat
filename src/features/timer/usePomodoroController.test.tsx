@@ -421,3 +421,45 @@ test('releases active focus resources when the controller unmounts', async () =>
   expect(audio.stop).toHaveBeenCalledTimes(1)
   expect(wakeLock.release).toHaveBeenCalledTimes(1)
 })
+
+test('reconciles running audio and wake lock when settings change', async () => {
+  const audio = { select: vi.fn().mockResolvedValue(undefined), setVolume: vi.fn(), start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
+  const wakeLock = { acquire: vi.fn().mockResolvedValue('active'), release: vi.fn().mockResolvedValue(undefined) }
+  const data = loadAppData(localStorage)
+  const { result, rerender } = renderHook(
+    ({ appData }) => usePomodoroController({ appData, audio, wakeLock }),
+    { initialProps: { appData: data } },
+  )
+
+  await act(async () => { await result.current.start() })
+  const changed = loadAppData(localStorage)
+  changed.settings.selectedSound = 'rain'
+  changed.settings.soundVolume = 0.7
+  changed.settings.keepScreenAwake = true
+  await act(async () => { rerender({ appData: changed }) })
+
+  expect(audio.select).toHaveBeenLastCalledWith('rain')
+  expect(audio.setVolume).toHaveBeenLastCalledWith(0.7)
+  expect(audio.start).toHaveBeenCalledTimes(1)
+  expect(wakeLock.acquire).toHaveBeenCalledOnce()
+
+  changed.settings.selectedSound = 'none'
+  changed.settings.keepScreenAwake = false
+  await act(async () => { rerender({ appData: changed }) })
+  expect(audio.stop).toHaveBeenCalled()
+  expect(wakeLock.release).toHaveBeenCalled()
+})
+
+test('sends one localized completion notification only when enabled', async () => {
+  const notifications = { notify: vi.fn() }
+  const data = loadAppData(localStorage)
+  data.settings.locale = 'en'
+  data.settings.notificationsEnabled = true
+  const { result } = renderHook(() => usePomodoroController({ appData: data, notifications, now: () => 60_000 }))
+
+  await act(async () => { await result.current.start() })
+  await act(async () => { await result.current.finishCurrentPhase() })
+
+  expect(notifications.notify).toHaveBeenCalledTimes(1)
+  expect(notifications.notify).toHaveBeenCalledWith('Phase complete', 'Time for a break')
+})

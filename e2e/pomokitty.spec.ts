@@ -94,7 +94,8 @@ test('timer resumes from the persisted deadline after pause and reload, then rec
     const data = JSON.parse(localStorage.getItem(key) ?? '{}')
     if (!data.activeSession) throw new Error('Active timer was not persisted')
     data.activeSession.targetEndsAt = Date.now() + 120_000
-    data.activeSession.remainingSeconds = 99_999
+    data.activeSession.totalMs = 25 * 60 * 1_000
+    data.activeSession.remainingSeconds = 120
     localStorage.setItem(key, JSON.stringify(data))
   })
   await page.reload()
@@ -161,4 +162,116 @@ test('settings persist sound and language choices, respect reduced motion, and r
 
   await expect(page.getByLabel('Как тебя зовут?')).toBeVisible()
   await expect.poll(() => page.evaluate(() => localStorage.getItem('pomokitty:data:v1'))).toBeNull()
+})
+
+test('honors manual and automatic expiry transitions', async ({ page }) => {
+  await page.goto('/pomokitty/')
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await page.getByRole('button', { name: 'Начать' }).click()
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}')
+    data.activeSession.targetEndsAt = Date.now() - 1
+    localStorage.setItem('pomokitty:data:v1', JSON.stringify(data))
+  })
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Продолжить' })).toBeVisible()
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible()
+  await expect(page.locator('.timer-screen__status output')).toHaveText('05:00')
+
+  await page.evaluate(() => localStorage.clear())
+  await page.reload()
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await page.getByRole('button', { name: 'Настройки' }).click()
+  await page.getByLabel('Начинать следующий этап автоматически').check()
+  await page.getByRole('button', { name: 'Таймер' }).click()
+  await page.getByRole('button', { name: 'Начать' }).click()
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}')
+    data.activeSession.targetEndsAt = Date.now() - 1
+    localStorage.setItem('pomokitty:data:v1', JSON.stringify(data))
+  })
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible()
+  await expect(page.locator('.timer-screen__status output')).toHaveText('05:00')
+})
+
+test('requests notification permission only from settings and sends one completion notification', async ({ page }) => {
+  await page.addInitScript(() => {
+    class TestNotification {
+      static permission = 'default'
+      static requestPermission = async () => {
+        TestNotification.permission = 'granted'
+        return 'granted' as NotificationPermission
+      }
+      constructor(title: string, options: NotificationOptions) {
+        ;(window as Window & { notices?: unknown[] }).notices ??= []
+        ;(window as Window & { notices: unknown[] }).notices.push({ title, options })
+      }
+    }
+    Object.defineProperty(window, 'Notification', { configurable: true, value: TestNotification })
+  })
+  await page.goto('/pomokitty/')
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await page.getByRole('button', { name: 'Настройки' }).click()
+  await page.getByLabel('Показывать уведомления').check()
+  await page.getByRole('button', { name: 'Таймер' }).click()
+  await page.getByRole('button', { name: 'Начать' }).click()
+  await page.getByRole('button', { name: 'Завершить этап' }).click()
+  await expect.poll(() => page.evaluate(() => (window as Window & { notices?: unknown[] }).notices?.length ?? 0)).toBe(1)
+})
+
+test('continues with a localized unsaved-data state when browser storage rejects writes', async ({ page }) => {
+  await page.addInitScript(() => {
+    const originalSetItem = Storage.prototype.setItem
+    Storage.prototype.setItem = function(key: string, value: string) {
+      if (key === 'pomokitty:data:v1') throw new DOMException('blocked')
+      return originalSetItem.call(this, key, value)
+    }
+  })
+  await page.goto('/pomokitty/')
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await expect(page.getByRole('main', { name: 'pomokitty' })).toBeVisible()
+  await expect(page.getByText('Не удалось сохранить изменения на этом устройстве.', { exact: true })).toBeVisible()
+})
+
+test('reconciles live audio and wake lock settings and safely resets malformed persistence', async ({ page }) => {
+  await page.addInitScript(() => {
+    class TestAudio {
+      static calls: Array<Record<string, unknown>> = []
+      loop = false
+      volume = 1
+      currentTime = 0
+      constructor(public readonly src?: string) { TestAudio.calls.push({ type: 'new', src }) }
+      play() { TestAudio.calls.push({ type: 'play', src: this.src, volume: this.volume }); return Promise.resolve() }
+      pause() { TestAudio.calls.push({ type: 'pause', src: this.src }); }
+    }
+    Object.defineProperty(window, 'Audio', { configurable: true, value: TestAudio })
+    ;(window as Window & { audioCalls?: unknown[] }).audioCalls = TestAudio.calls
+    const wakeLock = { request: () => Promise.resolve({ addEventListener() {}, release: () => Promise.resolve() }) }
+    Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: wakeLock })
+  })
+  await page.goto('/pomokitty/')
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await page.getByRole('button', { name: 'Начать' }).click()
+  await page.getByRole('button', { name: 'Настройки' }).click()
+  await page.getByLabel('Фоновый звук').selectOption('rain')
+  await page.getByLabel('Громкость: 50%').fill('70')
+  await page.getByLabel('Не выключать экран во время фокуса').check()
+  await expect.poll(() => page.evaluate(() => (window as Window & { audioCalls: unknown[] }).audioCalls.length)).toBeGreaterThan(1)
+  await page.getByLabel('Фоновый звук').selectOption('none')
+  await page.getByLabel('Не выключать экран во время фокуса').uncheck()
+
+  await page.evaluate(() => {
+    const data = JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}')
+    data.activeSession.targetEndsAt = 'malformed'
+    localStorage.setItem('pomokitty:data:v1', JSON.stringify(data))
+  })
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Начать' })).toBeVisible()
 })

@@ -91,6 +91,7 @@ test('persists a setting locale change and passes the effective locale to visibl
   await user.selectOptions(screen.getByLabelText('Язык'), 'en')
 
   expect(screen.getByText('Hello, Маша')).toBeInTheDocument()
+  expect(document.documentElement.lang).toBe('en')
   expect(loadAppData(localStorage).settings.locale).toBe('en')
 })
 

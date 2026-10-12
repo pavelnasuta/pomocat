@@ -2,13 +2,15 @@ import { getDailyMinutes, getWeeklyMinutes } from '../../domain/stats'
 import type { Locale, SessionHistoryItem } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
 
+type Translate = ReturnType<typeof useTranslation>['t']
+
 export interface StatsScreenProps {
   history: SessionHistoryItem[]
   locale?: Locale
 }
 
-function formatMinutes(minutes: number, locale: Locale): string {
-  return `${Math.round(minutes)} ${locale === 'ru' ? 'мин' : 'min'}`
+function formatMinutes(minutes: number, t: Translate): string {
+  return t('stats.minutes', { minutes: Math.round(minutes) })
 }
 
 function formatCompletedAt(value: string, locale: Locale): string {
@@ -20,10 +22,10 @@ function formatCompletedAt(value: string, locale: Locale): string {
   }).format(new Date(value))
 }
 
-function historyLabel(phase: SessionHistoryItem['phase'], locale: Locale): string {
-  if (phase === 'focus') return locale === 'ru' ? 'Фокус' : 'Focus'
-  if (phase === 'shortBreak') return locale === 'ru' ? 'Короткий перерыв' : 'Short break'
-  return locale === 'ru' ? 'Длинный перерыв' : 'Long break'
+function historyLabel(phase: SessionHistoryItem['phase'], t: Translate): string {
+  if (phase === 'focus') return t('stats.phase.focus')
+  if (phase === 'shortBreak') return t('stats.phase.shortBreak')
+  return t('stats.phase.longBreak')
 }
 
 export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
@@ -38,11 +40,11 @@ export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
       <div className="stats-screen__totals">
         <article className="stats-screen__total" data-testid="stats-today">
           <h2>{t('stats.today')}</h2>
-          <output>{formatMinutes(getDailyMinutes(history, now), locale)}</output>
+          <output>{formatMinutes(getDailyMinutes(history, now), t)}</output>
         </article>
         <article className="stats-screen__total" data-testid="stats-week">
           <h2>{t('stats.week')}</h2>
-          <output>{formatMinutes(getWeeklyMinutes(history, now), locale)}</output>
+          <output>{formatMinutes(getWeeklyMinutes(history, now), t)}</output>
         </article>
       </div>
 
@@ -54,8 +56,8 @@ export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
           <ul aria-label={t('stats.history')}>
             {orderedHistory.map((item) => (
               <li key={item.id}>
-                <span>{historyLabel(item.phase, locale)}</span>
-                <span>{formatMinutes(item.durationMinutes, locale)}</span>
+                <span>{historyLabel(item.phase, t)}</span>
+                <span>{formatMinutes(item.durationMinutes, t)}</span>
                 <time dateTime={item.completedAt}>{formatCompletedAt(item.completedAt, locale)}</time>
               </li>
             ))}

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { execFile } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
 import config from '../playwright.config'
@@ -57,4 +57,31 @@ test('keeps settings readable in a dedicated scrollable content area at mobile s
   await expect(settings).toHaveCSS('overflow-y', 'auto')
   await expect(page.getByRole('heading', { name: 'Настройки' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Очистить все данные' })).toBeVisible()
+})
+
+test('production Pages app and local audio remain available offline after service-worker control', async ({ browser }) => {
+  await execFileAsync('npm', ['run', 'build'])
+  const preview = spawn(process.execPath, ['e2e/pages-static-server.mjs'], { stdio: 'ignore' })
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  try {
+    await expect.poll(async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:4174/pomokitty/')
+        return response.ok
+      } catch {
+        return false
+      }
+    }, { timeout: 30_000 }).toBe(true)
+    await page.goto('http://127.0.0.1:4174/pomokitty/')
+    await page.reload()
+    await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null), { timeout: 30_000 }).toBe(true)
+    await context.setOffline(true)
+    await page.reload()
+    await expect(page.getByRole('heading', { name: 'Как тебя зовут?' })).toBeVisible()
+    await expect.poll(() => page.evaluate(async () => (await fetch('/pomokitty/sounds/rain.mp3')).ok)).toBe(true)
+  } finally {
+    await context.close()
+    preview.kill('SIGTERM')
+  }
 })

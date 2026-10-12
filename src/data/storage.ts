@@ -41,22 +41,34 @@ function isPhase(value: unknown): value is Phase {
   return typeof value === 'string' && phases.includes(value as Phase)
 }
 
+function isFiniteNumberInRange(value: unknown, minimum: number, maximum: number): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= minimum && value <= maximum
+}
+
+function isNonnegativeInteger(value: unknown, maximum: number): value is number {
+  return Number.isInteger(value) && typeof value === 'number' && value >= 0 && value <= maximum
+}
+
+function isValidDate(value: unknown): value is string {
+  return typeof value === 'string' && Number.isFinite(Date.parse(value))
+}
+
 function isSettings(value: unknown): value is PomodoroSettings {
   if (!isRecord(value)) return false
 
   return (
     (value.childName === undefined || typeof value.childName === 'string') &&
     isLocale(value.locale) &&
-    typeof value.focusMinutes === 'number' &&
-    typeof value.shortBreakMinutes === 'number' &&
-    typeof value.longBreakMinutes === 'number' &&
-    typeof value.roundsBeforeLongBreak === 'number' &&
+    isFiniteNumberInRange(value.focusMinutes, 1, 180) &&
+    isFiniteNumberInRange(value.shortBreakMinutes, 1, 180) &&
+    isFiniteNumberInRange(value.longBreakMinutes, 1, 180) &&
+    isFiniteNumberInRange(value.roundsBeforeLongBreak, 1, 12) &&
     typeof value.autoStartNext === 'boolean' &&
     typeof value.animationsEnabled === 'boolean' &&
     typeof value.notificationsEnabled === 'boolean' &&
     typeof value.keepScreenAwake === 'boolean' &&
     isSoundId(value.selectedSound) &&
-    typeof value.soundVolume === 'number'
+    isFiniteNumberInRange(value.soundVolume, 0, 1)
   )
 }
 
@@ -64,9 +76,15 @@ function isActiveSession(value: unknown): value is ActiveSession {
   return (
     isRecord(value) &&
     isPhase(value.phase) &&
-    typeof value.startedAt === 'string' &&
-    typeof value.remainingSeconds === 'number' &&
-    typeof value.completedRounds === 'number'
+    isValidDate(value.startedAt) &&
+    isFiniteNumberInRange(value.remainingSeconds, 0, 180 * 60) &&
+    isNonnegativeInteger(value.completedRounds, 10_000) &&
+    (value.targetEndsAt === undefined || isFiniteNumberInRange(value.targetEndsAt, 0, 8.64e15)) &&
+    (value.totalMs === undefined || isFiniteNumberInRange(value.totalMs, 1, 180 * 60 * 1_000)) &&
+    (value.completedFocusRounds === undefined || isNonnegativeInteger(value.completedFocusRounds, 10_000)) &&
+    (value.remainingMsWhenPaused === undefined || isFiniteNumberInRange(value.remainingMsWhenPaused, 0, 180 * 60 * 1_000)) &&
+    (value.pausedPhase === undefined || (value.pausedPhase !== 'idle' && value.pausedPhase !== 'paused' && isPhase(value.pausedPhase))) &&
+    (value.taskName === undefined || typeof value.taskName === 'string')
   )
 }
 
@@ -76,17 +94,19 @@ function isHistoryItem(value: unknown): value is SessionHistoryItem {
     typeof value.id === 'string' &&
     typeof value.phase === 'string' &&
     historyPhases.includes(value.phase as SessionHistoryItem['phase']) &&
-    typeof value.durationMinutes === 'number' &&
-    typeof value.completedAt === 'string'
+    isFiniteNumberInRange(value.durationMinutes, 0, 180) &&
+    isValidDate(value.completedAt) &&
+    (value.actualDurationMs === undefined || isFiniteNumberInRange(value.actualDurationMs, 0, 180 * 60 * 1_000)) &&
+    (value.plannedDurationMs === undefined || isFiniteNumberInRange(value.plannedDurationMs, 1, 180 * 60 * 1_000)) &&
+    (value.taskName === undefined || typeof value.taskName === 'string')
   )
 }
 
-function isAppData(value: unknown): value is AppData {
+function isAppData(value: unknown): value is Omit<AppData, 'activeSession'> & { activeSession?: unknown } {
   return (
     isRecord(value) &&
     value.version === 1 &&
     isSettings(value.settings) &&
-    (value.activeSession === undefined || isActiveSession(value.activeSession)) &&
     Array.isArray(value.history) &&
     value.history.every(isHistoryItem)
   )
@@ -126,16 +146,28 @@ export function loadAppData(storage: Storage): AppData {
     if (savedData === null) return defaultAppData()
 
     const parsedData: unknown = JSON.parse(savedData)
-    return isAppData(parsedData) ? parsedData : defaultAppData()
+    if (!isAppData(parsedData)) return defaultAppData()
+    const { activeSession, ...safeData } = parsedData
+    return isActiveSession(activeSession) ? { ...safeData, activeSession } : safeData
   } catch {
     return defaultAppData()
   }
 }
 
-export function saveAppData(storage: Storage, data: AppData): void {
-  storage.setItem(STORAGE_KEY, JSON.stringify(data))
+export function saveAppData(storage: Storage, data: AppData): boolean {
+  try {
+    storage.setItem(STORAGE_KEY, JSON.stringify(data))
+    return true
+  } catch {
+    return false
+  }
 }
 
-export function clearAppData(storage: Storage): void {
-  storage.removeItem(STORAGE_KEY)
+export function clearAppData(storage: Storage): boolean {
+  try {
+    storage.removeItem(STORAGE_KEY)
+    return true
+  } catch {
+    return false
+  }
 }
