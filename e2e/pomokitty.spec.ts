@@ -19,16 +19,16 @@ for (const viewport of requiredDiagnosticViewports) {
     await page.getByRole('button', { name: 'Продолжить' }).click()
 
     const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
-      const task = timerScreen.querySelector('input')
+      const status = timerScreen.querySelector('.timer-screen__status')
       const primaryAction = timerScreen.querySelector('.timer-screen__primary')
-      if (!task || !primaryAction) throw new Error('Timer controls are missing')
+      if (!status || !primaryAction) throw new Error('Timer controls are missing')
 
-      const taskBox = task.getBoundingClientRect()
+      const statusBox = status.getBoundingClientRect()
       const primaryBox = primaryAction.getBoundingClientRect()
       return {
         pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
         timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
-        taskBottom: taskBox.bottom,
+        statusBottom: statusBox.bottom,
         primaryTop: primaryBox.top,
         primaryBottom: primaryBox.bottom,
         viewportHeight: window.innerHeight,
@@ -37,7 +37,7 @@ for (const viewport of requiredDiagnosticViewports) {
 
     expect(geometry.pageScrollable).toBe(false)
     expect(geometry.timerScrollable).toBe(false)
-    expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
+    expect(geometry.primaryTop).toBeGreaterThan(geometry.statusBottom)
     expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
   })
 }
@@ -54,16 +54,16 @@ test('first mobile visit stores the Russian child name and keeps the timer insid
   await expect(page.getByRole('button', { name: 'Начать' })).toBeVisible()
 
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
-    const task = timerScreen.querySelector('input')
+    const status = timerScreen.querySelector('.timer-screen__status')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
-    if (!task || !primaryAction) throw new Error('Timer controls are missing')
+    if (!status || !primaryAction) throw new Error('Timer controls are missing')
 
-    const taskBox = task.getBoundingClientRect()
+    const statusBox = status.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
     return {
       pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
       timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
-      taskBottom: taskBox.bottom,
+      statusBottom: statusBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
       viewportHeight: window.innerHeight,
@@ -72,7 +72,7 @@ test('first mobile visit stores the Russian child name and keeps the timer insid
 
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
-  expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
+  expect(geometry.primaryTop).toBeGreaterThan(geometry.statusBottom)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
 
   await page.reload()
@@ -85,7 +85,6 @@ test('timer resumes from the persisted deadline after pause and reload, then res
   await page.getByLabel('Как тебя зовут?').fill('Маша')
   await page.getByRole('button', { name: 'Продолжить' }).click()
 
-  await page.getByLabel('Что делаем?').fill('Математика')
   await page.getByRole('button', { name: 'Начать' }).click()
   await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible()
 
@@ -109,15 +108,15 @@ test('timer resumes from the persisted deadline after pause and reload, then res
   await expect(page.locator('.timer-screen__status output')).toHaveText(/01:5[7-9]|02:00/)
 
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
-    const task = timerScreen.querySelector('input')
+    const status = timerScreen.querySelector('.timer-screen__status')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
-    if (!task || !primaryAction) throw new Error('Timer controls are missing')
-    const taskBox = task.getBoundingClientRect()
+    if (!status || !primaryAction) throw new Error('Timer controls are missing')
+    const statusBox = status.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
     return {
       pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
       timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
-      taskBottom: taskBox.bottom,
+      statusBottom: statusBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
       viewportHeight: window.innerHeight,
@@ -125,12 +124,12 @@ test('timer resumes from the persisted deadline after pause and reload, then res
   })
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
-  expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
+  expect(geometry.primaryTop).toBeGreaterThan(geometry.statusBottom)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
 
   await page.getByRole('button', { name: 'Я сделал!' }).click()
   await expect(page.getByRole('button', { name: 'Начать' })).toBeVisible()
-  await expect(page.getByLabel('Что делаем?')).toHaveValue('')
+  await expect(page.getByLabel('Что делаем?')).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}').activeSession)).toBeUndefined()
 })
 
@@ -328,7 +327,9 @@ test('reconciles live audio and wake lock settings and safely resets malformed p
   await page.getByLabel('Громкость: 50%').fill('70')
   await page.getByLabel('Не выключать экран во время фокуса').check()
   await expect.poll(() => page.evaluate(() => (window as Window & { audioCalls: unknown[] }).audioCalls.length)).toBeGreaterThan(1)
-  await page.getByLabel('Фоновый звук').selectOption('none')
+  await page.getByRole('button', { name: 'Таймер' }).click()
+  await page.getByRole('button', { name: 'Выключить фоновый звук' }).click()
+  await page.getByRole('button', { name: 'Настройки' }).click()
   await page.getByLabel('Не выключать экран во время фокуса').uncheck()
 
   await page.evaluate(() => {

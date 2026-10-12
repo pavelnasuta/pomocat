@@ -37,20 +37,20 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
   await page.getByRole('button', { name: 'Start' }).click()
 
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
-    const task = timerScreen.querySelector('input')
+    const status = timerScreen.querySelector('.timer-screen__status')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
     const reset = timerScreen.querySelector('.timer-screen__reset')
     const navigation = document.querySelector('.bottom-nav')
-    if (!task || !primaryAction || !reset || !navigation) throw new Error('Timer controls are missing')
+    if (!status || !primaryAction || !reset || !navigation) throw new Error('Timer controls are missing')
 
-    const taskBox = task.getBoundingClientRect()
+    const statusBox = status.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
     const resetBox = reset.getBoundingClientRect()
     const navigationBox = navigation.getBoundingClientRect()
     return {
       pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
       timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
-      taskBottom: taskBox.bottom,
+      statusBottom: statusBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
       resetTop: resetBox.top,
@@ -62,7 +62,7 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
 
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
-  expect(geometry.primaryTop).toBeGreaterThan(geometry.taskBottom)
+  expect(geometry.primaryTop).toBeGreaterThan(geometry.statusBottom)
   expect(geometry.resetBottom).toBeLessThanOrEqual(geometry.primaryTop)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.navigationTop)
   expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)

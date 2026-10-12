@@ -9,7 +9,7 @@ export interface SoundSettingsProps {
   locale?: Locale
 }
 
-const sounds: SoundId[] = ['none', 'rain', 'whiteNoise']
+const sounds: SoundId[] = ['rain', 'whiteNoise']
 
 export function SoundSettings({
   selectedSound,

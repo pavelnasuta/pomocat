@@ -1,4 +1,4 @@
-import { Check, Pause, Play } from 'lucide-react'
+import { Check, Pause, Play, Volume2, VolumeX } from 'lucide-react'
 import { Mascot, type MascotPose } from '../../components/Mascot'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { PomodoroController } from './usePomodoroController'
@@ -39,6 +39,7 @@ export function TimerScreen({ controller }: TimerScreenProps) {
   const phaseLabel = t(isRest ? 'timer.restTime' : 'timer.workTime')
   const isResettable = controller.view.phase !== 'idle'
   const PrimaryIcon = controller.view.phase === 'paused' || !isActive ? Play : Pause
+  const SoundIcon = controller.soundEnabled ? Volume2 : VolumeX
 
   return (
     <section className="timer-screen" aria-label={t('navigation.timer')}>
@@ -55,12 +56,15 @@ export function TimerScreen({ controller }: TimerScreenProps) {
         >
           <span style={{ width: `${progress}%` }} />
         </div>
+        <button
+          type="button"
+          className="timer-screen__sound-toggle"
+          aria-label={t(controller.soundEnabled ? 'timer.soundOff' : 'timer.soundOn')}
+          onClick={controller.toggleSound}
+        >
+          <SoundIcon aria-hidden size={24} strokeWidth={2} />
+        </button>
       </header>
-
-      <label className="timer-screen__task">
-        <span>{t('timer.taskLabel')}</span>
-        <input value={controller.taskName} onChange={(event) => controller.setTaskName(event.target.value)} />
-      </label>
 
       <div className="timer-screen__actions">
         <Mascot

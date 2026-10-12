@@ -464,6 +464,31 @@ test('releases active focus resources when the controller unmounts', async () =>
   expect(wakeLock.release).toHaveBeenCalledTimes(1)
 })
 
+test('mutes and restores the selected background sound from the timer control', async () => {
+  const audio = { select: vi.fn().mockResolvedValue(undefined), setVolume: vi.fn(), start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
+  const data = loadAppData(localStorage)
+  data.settings.selectedSound = 'whiteNoise'
+  saveAppData(localStorage, data)
+  const { result } = renderHook(() => usePomodoroController({ audio }))
+
+  await act(async () => { await result.current.start() })
+  await act(async () => {
+    result.current.toggleSound()
+    await Promise.resolve()
+  })
+
+  expect(loadAppData(localStorage).settings).toMatchObject({ selectedSound: 'whiteNoise', soundEnabled: false })
+  expect(audio.stop).toHaveBeenCalled()
+
+  await act(async () => {
+    result.current.toggleSound()
+    await Promise.resolve()
+  })
+
+  expect(loadAppData(localStorage).settings.soundEnabled).toBe(true)
+  expect(audio.select).toHaveBeenLastCalledWith('whiteNoise')
+})
+
 test('reconciles running audio and wake lock when settings change', async () => {
   const audio = { select: vi.fn().mockResolvedValue(undefined), setVolume: vi.fn(), start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
   const wakeLock = { acquire: vi.fn().mockResolvedValue('active'), release: vi.fn().mockResolvedValue(undefined) }
@@ -475,17 +500,17 @@ test('reconciles running audio and wake lock when settings change', async () => 
 
   await act(async () => { await result.current.start() })
   const changed = loadAppData(localStorage)
-  changed.settings.selectedSound = 'rain'
+  changed.settings.selectedSound = 'whiteNoise'
   changed.settings.soundVolume = 0.7
   changed.settings.keepScreenAwake = true
   await act(async () => { rerender({ appData: changed }) })
 
-  expect(audio.select).toHaveBeenLastCalledWith('rain')
+  expect(audio.select).toHaveBeenLastCalledWith('whiteNoise')
   expect(audio.setVolume).toHaveBeenLastCalledWith(0.7)
-  expect(audio.start).toHaveBeenCalledTimes(1)
+  expect(audio.start).toHaveBeenCalledTimes(2)
   expect(wakeLock.acquire).toHaveBeenCalledOnce()
 
-  changed.settings.selectedSound = 'none'
+  changed.settings.soundEnabled = false
   changed.settings.keepScreenAwake = false
   await act(async () => { rerender({ appData: changed }) })
   expect(audio.stop).toHaveBeenCalled()

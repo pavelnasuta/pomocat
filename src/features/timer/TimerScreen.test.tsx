@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { PomodoroController } from './usePomodoroController'
 import { TimerScreen } from './TimerScreen'
@@ -10,6 +10,7 @@ function controllerFor(
   return {
     locale,
     animationsEnabled: true,
+    soundEnabled: true,
     view: {
       phase,
       remainingMs: 24 * 60 * 1_000,
@@ -21,6 +22,7 @@ function controllerFor(
     wakeLockStatus: 'active',
     audioStatus: 'idle',
     setTaskName: vi.fn(),
+    toggleSound: vi.fn(),
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
@@ -40,12 +42,25 @@ test('renders the active focus timer and pauses it from the primary action', asy
   expect(screen.queryByRole('heading', { name: 'Таймер' })).not.toBeInTheDocument()
   expect(screen.queryByText('Фокус')).not.toBeInTheDocument()
   expect(screen.getByRole('progressbar', { name: 'Прогресс этапа' })).toHaveAttribute('aria-valuenow', '4')
-  expect(screen.getByLabelText('Что делаем?')).toHaveDisplayValue('Math')
+  expect(screen.queryByLabelText('Что делаем?')).not.toBeInTheDocument()
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
   expect(screen.getByRole('button', { name: 'Пауза' })).toContainElement(document.querySelector('.lucide-pause'))
   await user.click(screen.getByRole('button', { name: 'Пауза' }))
 
   expect(controller.pause).toHaveBeenCalledTimes(1)
+})
+
+test('toggles the terracotta background-sound control below timer progress', async () => {
+  const controller = controllerFor()
+  const user = userEvent.setup()
+
+  render(<TimerScreen controller={controller} />)
+
+  const toggle = screen.getByRole('button', { name: 'Выключить фоновый звук' })
+  expect(toggle).toContainElement(document.querySelector('.lucide-volume-2'))
+  await user.click(toggle)
+
+  expect(controller.toggleSound).toHaveBeenCalledOnce()
 })
 
 test('uses the mascot collection across timer phases', () => {
@@ -63,17 +78,15 @@ test('uses the mascot collection across timer phases', () => {
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'sleep')
 })
 
-test('renders English paused controls and forwards task edits', async () => {
+test('renders English paused controls without a task field', async () => {
   const controller = controllerFor('paused', 'en')
   const user = userEvent.setup()
 
   render(<TimerScreen controller={controller} />)
 
-  const task = screen.getByLabelText('What are we doing?')
-  fireEvent.change(task, { target: { value: 'Science' } })
+  expect(screen.queryByLabelText('What are we doing?')).not.toBeInTheDocument()
   await user.click(screen.getByRole('button', { name: 'Resume' }))
 
-  expect(controller.setTaskName).toHaveBeenLastCalledWith('Science')
   expect(controller.resume).toHaveBeenCalledOnce()
 })
 

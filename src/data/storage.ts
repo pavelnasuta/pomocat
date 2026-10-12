@@ -18,7 +18,7 @@ const soundIds: SoundId[] = [
   'whiteNoise',
   'none',
 ]
-const offeredSoundIds: SoundId[] = ['rain', 'whiteNoise', 'none']
+const offeredSoundIds: SoundId[] = ['rain', 'whiteNoise']
 const phases: Phase[] = ['idle', 'focus', 'shortBreak', 'longBreak', 'paused']
 const historyPhases: SessionHistoryItem['phase'][] = [
   'focus',
@@ -128,7 +128,8 @@ function defaultSettings(): PomodoroSettings {
     animationsEnabled: true,
     notificationsEnabled: false,
     keepScreenAwake: false,
-    selectedSound: 'none',
+    selectedSound: 'rain',
+    soundEnabled: true,
     soundVolume: 0.5,
   }
 }
@@ -153,7 +154,8 @@ export function loadAppData(storage: Storage): AppData {
       ...safeData,
       settings: {
         ...safeData.settings,
-        selectedSound: offeredSoundIds.includes(safeData.settings.selectedSound) ? safeData.settings.selectedSound : 'none',
+        selectedSound: offeredSoundIds.includes(safeData.settings.selectedSound) ? safeData.settings.selectedSound : 'rain',
+        soundEnabled: safeData.settings.soundEnabled !== false,
       },
     }
     return isActiveSession(activeSession) ? { ...normalizedData, activeSession } : normalizedData

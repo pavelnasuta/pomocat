@@ -22,6 +22,7 @@ export interface PomodoroSettings {
   notificationsEnabled: boolean
   keepScreenAwake: boolean
   selectedSound: SoundId
+  soundEnabled?: boolean
   soundVolume: number
 }
 

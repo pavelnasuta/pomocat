@@ -21,6 +21,7 @@ test('saves data that can be loaded again', () => {
       notificationsEnabled: false,
       keepScreenAwake: false,
       selectedSound: 'rain' as const,
+      soundEnabled: true,
       soundVolume: 0.5,
     },
     history: [],
@@ -31,7 +32,7 @@ test('saves data that can be loaded again', () => {
   expect(loadAppData(localStorage)).toEqual(data)
 })
 
-test('normalizes no-longer-offered sound choices to silence', () => {
+test('normalizes no-longer-offered sound choices to rain', () => {
   localStorage.setItem(
     'pomokitty:data:v1',
     JSON.stringify({
@@ -45,7 +46,7 @@ test('normalizes no-longer-offered sound choices to silence', () => {
     }),
   )
 
-  expect(loadAppData(localStorage).settings.selectedSound).toBe('none')
+  expect(loadAppData(localStorage).settings.selectedSound).toBe('rain')
 })
 
 test('clears saved data', () => {

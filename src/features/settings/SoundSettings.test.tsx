@@ -11,17 +11,16 @@ test('renders a visible localized volume label and native range input', () => {
   expect(screen.getByLabelText('Громкость: 50%')).toHaveAttribute('max', '100')
 })
 
-test('offers only rain and white noise plus the silent option', async () => {
+test('offers only rain and white noise because the timer control handles muting', async () => {
   const onSelect = vi.fn()
   const onVolumeChange = vi.fn()
   const user = userEvent.setup()
   render(
-    <SoundSettings selectedSound="none" volume={0.5} onSelect={onSelect} onVolumeChange={onVolumeChange} />,
+    <SoundSettings selectedSound="rain" volume={0.5} onSelect={onSelect} onVolumeChange={onVolumeChange} />,
   )
 
-  expect(screen.getByLabelText('Фоновый звук')).toHaveValue('none')
+  expect(screen.getByLabelText('Фоновый звук')).toHaveValue('rain')
   expect(Array.from(screen.getByLabelText('Фоновый звук').querySelectorAll('option')).map((option) => option.value)).toEqual([
-    'none',
     'rain',
     'whiteNoise',
   ])

@@ -22,11 +22,13 @@ type NotificationPort = Pick<NotificationController, 'notify'>
 export interface PomodoroController {
   locale: Locale
   animationsEnabled: boolean
+  soundEnabled: boolean
   view: TimerView
   taskName: string
   wakeLockStatus: 'active' | 'unavailable' | 'idle'
   audioStatus: 'idle' | 'blocked'
   setTaskName(value: string): void
+  toggleSound(): void
   start(): Promise<void>
   pause(): Promise<void>
   resume(): Promise<void>
@@ -145,7 +147,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   }
 
   async function activateResources(nextSession: ActiveSession, operation: number, settings: PomodoroSettings) {
-    if (settings.selectedSound !== 'none') {
+    if (settings.soundEnabled !== false && settings.selectedSound !== 'none') {
       try {
         await audio.select?.(settings.selectedSound)
         if (!isCurrentActivation(operation)) return
@@ -193,6 +195,17 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   function setTaskName(value: string) {
     setTaskNameState(value)
     if (session) persist({ ...session, taskName: value })
+  }
+
+  function toggleSound() {
+    const nextAppData = {
+      ...appData,
+      settings: { ...appData.settings, soundEnabled: appData.settings.soundEnabled === false },
+    }
+    const saved = saveAppData(storage, nextAppData)
+    options.onPersistenceChange?.(!saved)
+    setAppData(nextAppData)
+    options.onAppDataChange?.(nextAppData)
   }
 
   async function start() {
@@ -275,16 +288,24 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   useEffect(() => {
     if (!resourcesStarted.current || !session || !isRunning(session)) return
     reconcileActiveResources(session, appData.settings)
-  }, [appData.settings.selectedSound, appData.settings.soundVolume, appData.settings.keepScreenAwake, isVisible])
+  }, [
+    appData.settings.selectedSound,
+    appData.settings.soundEnabled,
+    appData.settings.soundVolume,
+    appData.settings.keepScreenAwake,
+    isVisible,
+  ])
 
   return {
     locale: appData.settings.locale,
     animationsEnabled: appData.settings.animationsEnabled,
+    soundEnabled: appData.settings.soundEnabled !== false,
     view: session ? getTimerView(session, clock) : idleView(),
     taskName,
     wakeLockStatus,
     audioStatus,
     setTaskName,
+    toggleSound,
     start,
     pause,
     resume,
