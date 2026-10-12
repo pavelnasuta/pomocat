@@ -1,9 +1,9 @@
-import { ChartNoAxesColumn, Settings, Timer } from 'lucide-react'
+import { BookOpen, ChartNoAxesColumn, Settings, Timer } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Locale } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
 
-export type NavigationSection = 'timer' | 'stats' | 'settings'
+export type NavigationSection = 'timer' | 'stats' | 'settings' | 'advice'
 
 interface BottomNavProps {
   active: NavigationSection
@@ -11,11 +11,12 @@ interface BottomNavProps {
   onChange(section: NavigationSection): void
 }
 
-const navigationSections: NavigationSection[] = ['timer', 'stats', 'settings']
+const navigationSections: NavigationSection[] = ['timer', 'stats', 'advice', 'settings']
 
 const navigationIcons: Record<NavigationSection, LucideIcon> = {
   timer: Timer,
   stats: ChartNoAxesColumn,
+  advice: BookOpen,
   settings: Settings,
 }
 

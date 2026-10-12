@@ -80,6 +80,18 @@ test('restores an active session and renders its remaining time', () => {
   vi.useRealTimers()
 })
 
+test('opens the advice list from navigation', async () => {
+  const data = loadAppData(localStorage)
+  data.settings.childName = 'Маша'
+  saveAppData(localStorage, data)
+  const user = userEvent.setup()
+
+  render(<App />)
+  await user.click(screen.getByRole('button', { name: 'Советы' }))
+
+  expect(screen.getByRole('heading', { name: 'Советы для продуктивного дня' })).toBeInTheDocument()
+})
+
 test('persists a setting locale change and passes the effective locale to visible app copy', async () => {
   const data = loadAppData(localStorage)
   data.settings.childName = 'Маша'

@@ -4,6 +4,7 @@ import { Onboarding } from '../components/Onboarding'
 import { clearAppData, loadAppData, saveAppData } from '../data/storage'
 import { NotificationController } from '../device/notifications'
 import { SettingsScreen } from '../features/settings/SettingsScreen'
+import { AdviceListScreen } from '../features/advice/AdviceListScreen'
 import { StatsScreen } from '../features/stats/StatsScreen'
 import { TimerScreen } from '../features/timer/TimerScreen'
 import { usePomodoroController } from '../features/timer/usePomodoroController'
@@ -83,6 +84,12 @@ export function App() {
           <section className="app-section app-section--scroll" aria-labelledby="stats-section-title">
             <h1 id="stats-section-title">{t('navigation.stats')}</h1>
             <StatsScreen history={appData.history} locale={effectiveLocale} />
+          </section>
+        )}
+
+        {activeSection === 'advice' && (
+          <section className="app-section app-section--scroll" aria-label={t('navigation.advice')}>
+            <AdviceListScreen locale={effectiveLocale} />
           </section>
         )}
 

@@ -22,8 +22,10 @@ test('changes to the selected navigation section', async () => {
   expect(screen.getByTestId('nav-icon-stats')).toHaveClass('lucide-chart-no-axes-column')
   expect(screen.getByTestId('nav-icon-settings')).toHaveAttribute('aria-hidden', 'true')
   expect(screen.getByTestId('nav-icon-settings')).toHaveClass('lucide-settings')
+  expect(screen.getByTestId('nav-icon-advice')).toHaveAttribute('aria-hidden', 'true')
+  expect(screen.getByTestId('nav-icon-advice')).toHaveClass('lucide-book-open')
 
-  await user.click(screen.getByRole('button', { name: 'Статистика' }))
+  await user.click(screen.getByRole('button', { name: 'Советы' }))
 
-  expect(onChange).toHaveBeenCalledWith('stats')
+  expect(onChange).toHaveBeenCalledWith('advice')
 })
