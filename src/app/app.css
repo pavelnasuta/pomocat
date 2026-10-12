@@ -410,7 +410,8 @@ input:focus-visible {
 
 .settings-screen fieldset,
 .stats-screen__total,
-.stats-screen__history {
+.stats-screen__history,
+.stats-screen__session-count {
   display: grid;
   gap: 10px;
   margin: 0;
@@ -502,6 +503,37 @@ input:focus-visible {
   font-size: clamp(1.6rem, 8vw, 2.5rem);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+}
+
+.stats-screen__sessions {
+  display: grid;
+  gap: 12px;
+}
+
+.stats-screen__session-count {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.stats-screen__session-count h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.stats-screen__session-count output {
+  justify-self: end;
+  color: var(--color-terracotta);
+  font-size: 2rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.stats-screen__cats {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-wrap: wrap;
+  gap: 4px;
+  color: var(--color-terracotta);
 }
 
 .stats-screen__history ul {

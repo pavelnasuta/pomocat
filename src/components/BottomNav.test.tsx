@@ -19,7 +19,7 @@ test('changes to the selected navigation section', async () => {
   expect(screen.getByTestId('nav-icon-timer')).toHaveAttribute('aria-hidden', 'true')
   expect(screen.getByTestId('nav-icon-timer')).toHaveClass('lucide-timer')
   expect(screen.getByTestId('nav-icon-stats')).toHaveAttribute('aria-hidden', 'true')
-  expect(screen.getByTestId('nav-icon-stats')).toHaveClass('lucide-chart-no-axes-column')
+  expect(screen.getByTestId('nav-icon-stats')).toHaveClass('lucide-cat')
   expect(screen.getByTestId('nav-icon-settings')).toHaveAttribute('aria-hidden', 'true')
   expect(screen.getByTestId('nav-icon-settings')).toHaveClass('lucide-settings')
   expect(screen.getByTestId('nav-icon-advice')).toHaveAttribute('aria-hidden', 'true')

@@ -1,4 +1,4 @@
-import { BookOpen, ChartNoAxesColumn, Settings, Timer } from 'lucide-react'
+import { BookOpen, Cat, Settings, Timer } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Locale } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
@@ -15,7 +15,7 @@ const navigationSections: NavigationSection[] = ['timer', 'stats', 'advice', 'se
 
 const navigationIcons: Record<NavigationSection, LucideIcon> = {
   timer: Timer,
-  stats: ChartNoAxesColumn,
+  stats: Cat,
   advice: BookOpen,
   settings: Settings,
 }

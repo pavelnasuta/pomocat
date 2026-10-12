@@ -25,6 +25,36 @@ function sumCompletedWithin(
   }, 0)
 }
 
+function countCompletedWithin(
+  history: SessionHistoryItem[],
+  start: Date,
+  end: Date,
+): number {
+  return history.filter((item) => {
+    const completedAt = new Date(item.completedAt)
+    return item.phase === 'focus' && completedAt >= start && completedAt < end
+  }).length
+}
+
+export function getAllSessionCount(history: SessionHistoryItem[]): number {
+  return history.filter((item) => item.phase === 'focus').length
+}
+
+export function getWeeklySessionCount(history: SessionHistoryItem[], now: Date): number {
+  const start = startOfDay(now)
+  const daysSinceMonday = (start.getDay() + 6) % 7
+  start.setDate(start.getDate() - daysSinceMonday)
+  const end = new Date(start)
+  end.setDate(end.getDate() + 7)
+  return countCompletedWithin(history, start, end)
+}
+
+export function getMonthlySessionCount(history: SessionHistoryItem[], now: Date): number {
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  return countCompletedWithin(history, start, end)
+}
+
 export function getDailyMinutes(history: SessionHistoryItem[], now: Date): number {
   const start = startOfDay(now)
   const end = new Date(start)

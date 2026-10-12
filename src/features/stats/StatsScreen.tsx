@@ -1,4 +1,11 @@
-import { getDailyMinutes, getWeeklyMinutes } from '../../domain/stats'
+import { Cat } from 'lucide-react'
+import {
+  getAllSessionCount,
+  getDailyMinutes,
+  getMonthlySessionCount,
+  getWeeklyMinutes,
+  getWeeklySessionCount,
+} from '../../domain/stats'
 import type { Locale, SessionHistoryItem } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
 
@@ -13,27 +20,29 @@ function formatMinutes(minutes: number, t: Translate): string {
   return t('stats.minutes', { minutes: Math.round(minutes) })
 }
 
-function formatCompletedAt(value: string, locale: Locale): string {
-  return new Intl.DateTimeFormat(locale === 'ru' ? 'ru-RU' : 'en-US', {
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(value))
+interface SessionCountTileProps {
+  count: number
+  label: 'all' | 'week' | 'month'
+  t: Translate
 }
 
-function historyLabel(phase: SessionHistoryItem['phase'], t: Translate): string {
-  if (phase === 'focus') return t('stats.phase.focus')
-  if (phase === 'shortBreak') return t('stats.phase.shortBreak')
-  return t('stats.phase.longBreak')
+function SessionCountTile({ count, label, t }: SessionCountTileProps) {
+  return (
+    <article className="stats-screen__session-count" data-testid={`stats-sessions-${label}`}>
+      <h2>{t(`stats.completed.${label}`)}</h2>
+      <output>{count}</output>
+      <div className="stats-screen__cats" aria-label={`${count} ${t('stats.completed.all').toLocaleLowerCase()}`}>
+        {Array.from({ length: count }, (_, index) => (
+          <Cat key={index} aria-hidden data-testid="stats-session-cat" size={26} strokeWidth={1.8} />
+        ))}
+      </div>
+    </article>
+  )
 }
 
 export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
   const { t } = useTranslation(locale)
   const now = new Date()
-  const orderedHistory = [...history].sort(
-    (first, second) => new Date(second.completedAt).getTime() - new Date(first.completedAt).getTime(),
-  )
 
   return (
     <section className="stats-screen" aria-label={t('navigation.stats')}>
@@ -48,22 +57,10 @@ export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
         </article>
       </div>
 
-      <section className="stats-screen__history" aria-labelledby="stats-history-title">
-        <h2 id="stats-history-title">{t('stats.history')}</h2>
-        {orderedHistory.length === 0 ? (
-          <p>{t('stats.empty')}</p>
-        ) : (
-          <ul aria-label={t('stats.history')}>
-            {orderedHistory.map((item) => (
-              <li key={item.id}>
-                <span>{historyLabel(item.phase, t)}</span>
-                <span>{formatMinutes(item.durationMinutes, t)}</span>
-                {item.taskName && <span>{t('stats.task', { taskName: item.taskName })}</span>}
-                <time dateTime={item.completedAt}>{formatCompletedAt(item.completedAt, locale)}</time>
-              </li>
-            ))}
-          </ul>
-        )}
+      <section className="stats-screen__sessions" aria-label={t('stats.completed.all')}>
+        <SessionCountTile count={getWeeklySessionCount(history, now)} label="week" t={t} />
+        <SessionCountTile count={getMonthlySessionCount(history, now)} label="month" t={t} />
+        <SessionCountTile count={getAllSessionCount(history)} label="all" t={t} />
       </section>
     </section>
   )
