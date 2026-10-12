@@ -1,9 +1,15 @@
+import { ChevronRight } from 'lucide-react'
 import type { Locale } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
 
-const articleKeys = ['start', 'smallSteps', 'breaks', 'distractions', 'motivation'] as const
+import { articleIds, type AdviceArticleId } from './articles'
 
-export function AdviceListScreen({ locale }: { locale: Locale }) {
+interface AdviceListScreenProps {
+  locale: Locale
+  onOpen(article: AdviceArticleId): void
+}
+
+export function AdviceListScreen({ locale, onOpen }: AdviceListScreenProps) {
   const { t } = useTranslation(locale)
 
   return (
@@ -15,12 +21,20 @@ export function AdviceListScreen({ locale }: { locale: Locale }) {
       </header>
 
       <ul className="advice-list__articles" aria-label={t('advice.articlesLabel')}>
-        {articleKeys.map((article) => (
+        {articleIds.map((article) => (
           <li key={article}>
-            <article>
-              <h3>{t(`advice.${article}.title`)}</h3>
-              <p>{t(`advice.${article}.summary`)}</p>
-            </article>
+            <button
+              type="button"
+              className="advice-list__article-button"
+              aria-label={t(`advice.${article}.title`)}
+              onClick={() => onOpen(article)}
+            >
+              <article>
+                <h3>{t(`advice.${article}.title`)}</h3>
+                <p>{t(`advice.${article}.summary`)}</p>
+              </article>
+              <ChevronRight aria-hidden className="advice-list__chevron" size={22} strokeWidth={2} />
+            </button>
           </li>
         ))}
       </ul>

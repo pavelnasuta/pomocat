@@ -88,7 +88,10 @@ test('opens the advice list from navigation', async () => {
 
   render(<App />)
   await user.click(screen.getByRole('button', { name: 'Советы' }))
+  await user.click(screen.getByRole('button', { name: /Как начать без уговоров/ }))
 
+  expect(screen.getByRole('heading', { name: 'Как начать без уговоров' })).toBeInTheDocument()
+  await user.click(screen.getByRole('button', { name: 'Назад' }))
   expect(screen.getByRole('heading', { name: 'Советы для продуктивного дня' })).toBeInTheDocument()
 })
 

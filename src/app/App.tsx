@@ -4,7 +4,9 @@ import { Onboarding } from '../components/Onboarding'
 import { clearAppData, loadAppData, saveAppData } from '../data/storage'
 import { NotificationController } from '../device/notifications'
 import { SettingsScreen } from '../features/settings/SettingsScreen'
+import { AdviceArticleScreen } from '../features/advice/AdviceArticleScreen'
 import { AdviceListScreen } from '../features/advice/AdviceListScreen'
+import type { AdviceArticleId } from '../features/advice/articles'
 import { StatsScreen } from '../features/stats/StatsScreen'
 import { TimerScreen } from '../features/timer/TimerScreen'
 import { usePomodoroController } from '../features/timer/usePomodoroController'
@@ -22,6 +24,7 @@ export function App() {
     onPersistenceChange: setUnsavedData,
   })
   const [activeSection, setActiveSection] = useState<NavigationSection>('timer')
+  const [activeAdviceArticle, setActiveAdviceArticle] = useState<AdviceArticleId>()
   const effectiveLocale = appData.settings.locale
   const { t } = useTranslation(effectiveLocale)
 
@@ -89,7 +92,15 @@ export function App() {
 
         {activeSection === 'advice' && (
           <section className="app-section app-section--scroll" aria-label={t('navigation.advice')}>
-            <AdviceListScreen locale={effectiveLocale} />
+            {activeAdviceArticle ? (
+              <AdviceArticleScreen
+                article={activeAdviceArticle}
+                locale={effectiveLocale}
+                onBack={() => setActiveAdviceArticle(undefined)}
+              />
+            ) : (
+              <AdviceListScreen locale={effectiveLocale} onOpen={setActiveAdviceArticle} />
+            )}
           </section>
         )}
 
