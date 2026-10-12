@@ -6,5 +6,5 @@ test('mascot disables motion when animations are disabled', () => {
 
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-animated', 'false')
   expect(screen.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
-  expect(screen.getByTestId('mascot').querySelector('svg')).toHaveAttribute('stroke-width', '2')
+  expect(screen.getByTestId('mascot').querySelector('.mascot__image')).toHaveAttribute('src', expect.stringContaining('focus'))
 })

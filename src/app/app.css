@@ -455,11 +455,20 @@ input:focus-visible {
   color: var(--color-terracotta);
 }
 
-.mascot svg {
+.mascot__image {
   display: block;
   width: 100%;
   height: auto;
-  overflow: visible;
+  user-select: none;
+  transform-origin: bottom center;
+}
+
+.mascot--active .mascot__image {
+  animation: mascot-breathe 2.8s ease-in-out infinite;
+}
+
+.mascot--celebrate.mascot--active .mascot__image {
+  animation: mascot-celebrate 0.75s ease-out infinite;
 }
 
 .mascot__body,
@@ -529,6 +538,17 @@ input:focus-visible {
   }
 }
 
+@keyframes mascot-celebrate {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+
+  50% {
+    transform: scale(1.06) rotate(-2deg);
+  }
+}
+
 @keyframes mascot-blink {
   0%,
   94%,
@@ -593,6 +613,7 @@ input:focus-visible {
     scroll-behavior: auto !important;
   }
 
+  .mascot--active .mascot__image,
   .mascot--active .mascot__body,
   .mascot--active .mascot__eyes,
   .mascot--active .mascot__tail,
