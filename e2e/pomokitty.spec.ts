@@ -143,7 +143,7 @@ test('settings persist sound and language choices, respect reduced motion, and r
   await page.getByLabel('Как тебя зовут?').fill('Маша')
   await page.getByRole('button', { name: 'Продолжить' }).click()
   await page.getByRole('button', { name: 'Начать' }).click()
-  await expect(page.locator('.mascot__body')).toHaveCSS('animation-name', 'none')
+  await expect(page.locator('.mascot__image')).toHaveCSS('animation-name', 'none')
 
   await page.getByRole('button', { name: 'Настройки' }).click()
   await page.getByLabel('Фоновый звук').selectOption('rain')
