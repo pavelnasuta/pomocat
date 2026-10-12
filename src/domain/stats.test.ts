@@ -67,3 +67,18 @@ test('excludes break entries from daily and weekly focus totals', () => {
   expect(getDailyMinutes(mixedHistory, now)).toBe(25)
   expect(getWeeklyMinutes(mixedHistory, now)).toBe(25)
 })
+
+test('uses actual elapsed focus duration when it is available', () => {
+  const earlyFinish: SessionHistoryItem[] = [
+    {
+      id: 'early-finish',
+      phase: 'focus',
+      durationMinutes: 25,
+      actualDurationMs: 5 * 60 * 1_000,
+      plannedDurationMs: 25 * 60 * 1_000,
+      completedAt: '2026-10-11T10:00:00.000Z',
+    },
+  ]
+
+  expect(getDailyMinutes(earlyFinish, new Date('2026-10-11T12:00:00.000Z'))).toBe(5)
+})

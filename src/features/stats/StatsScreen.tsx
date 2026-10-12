@@ -8,7 +8,7 @@ export interface StatsScreenProps {
 }
 
 function formatMinutes(minutes: number, locale: Locale): string {
-  return `${minutes} ${locale === 'ru' ? 'мин' : 'min'}`
+  return `${Math.round(minutes)} ${locale === 'ru' ? 'мин' : 'min'}`
 }
 
 function formatCompletedAt(value: string, locale: Locale): string {

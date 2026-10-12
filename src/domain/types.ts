@@ -43,6 +43,11 @@ export interface SessionHistoryItem {
   phase: Exclude<Phase, 'idle' | 'paused'>
   durationMinutes: number
   completedAt: string
+  /** Actual elapsed duration, retained for precise future statistics. */
+  actualDurationMs?: number
+  /** Original phase duration, useful when a child finishes early. */
+  plannedDurationMs?: number
+  taskName?: string
 }
 
 export interface AppData {

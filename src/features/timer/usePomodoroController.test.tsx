@@ -215,13 +215,13 @@ test('persists the next phase and releases resources when the current phase fini
 
   expect(loadAppData(localStorage)).toMatchObject({
     activeSession: { phase: 'shortBreak', taskName: 'Math' },
-    history: [{ phase: 'focus', durationMinutes: 25 }],
+    history: [{ phase: 'focus', durationMinutes: 24 }],
   })
   expect(audio.stop).toHaveBeenCalledTimes(1)
   expect(wakeLock.release).toHaveBeenCalledTimes(1)
 })
 
-test('finishes an elapsed active phase during the display refresh', async () => {
+test('waits for an explicit resume after an elapsed phase when automatic transitions are disabled', async () => {
   vi.useFakeTimers()
   let now = 0
   const audio = { start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
@@ -246,7 +246,11 @@ test('finishes an elapsed active phase during the display refresh', async () => 
     await vi.advanceTimersByTimeAsync(250)
   })
 
-  expect(result.current.view.phase).toBe('shortBreak')
+  expect(result.current.view.phase).toBe('paused')
+  expect(loadAppData(localStorage).activeSession).toMatchObject({
+    phase: 'paused',
+    pausedPhase: 'shortBreak',
+  })
   expect(wakeLock.release).toHaveBeenCalledTimes(1)
   vi.useRealTimers()
 })

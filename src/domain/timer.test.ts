@@ -61,6 +61,18 @@ test('returns one completed focus history item when focus ends', () => {
   })
 })
 
+test('records actual focus time, planned time, and the task title when focus ends early', () => {
+  const transition = completeCurrentPhase(startSession(0, settings, 'Math'), settings, 5 * 60 * 1_000)
+
+  expect(transition.historyItem).toMatchObject({
+    phase: 'focus',
+    durationMinutes: 5,
+    actualDurationMs: 5 * 60 * 1_000,
+    plannedDurationMs: 25 * 60 * 1_000,
+    taskName: 'Math',
+  })
+})
+
 test('does not add a history item when a break ends', () => {
   const breakTransition = completeCurrentPhase(startSession(0, settings), settings, 25 * 60 * 1_000)
   const nextTransition = completeCurrentPhase(

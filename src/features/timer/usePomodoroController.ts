@@ -27,7 +27,7 @@ export interface PomodoroController {
   start(): Promise<void>
   pause(): Promise<void>
   resume(): Promise<void>
-  finishCurrentPhase(): Promise<void>
+  finishCurrentPhase(autoStartNext?: boolean): Promise<void>
   reset(): Promise<void>
 }
 
@@ -200,12 +200,15 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     if (isRunning(nextSession)) await queueResourceTransition(() => activateResources(nextSession, operation))
   }
 
-  async function finishCurrentPhase() {
+  async function finishCurrentPhase(autoStartNext = true) {
     if (!isRunning(session)) return
     invalidateActivation()
     const transition = completeCurrentPhase(session, appData.settings, now())
+    const nextSession = autoStartNext
+      ? transition.nextSession
+      : pauseSession(transition.nextSession, now())
     persist(
-      transition.nextSession,
+      nextSession,
       transition.historyItem ? [...appData.history, transition.historyItem] : appData.history,
     )
     await queueResourceTransition(releaseResources)
@@ -224,7 +227,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     if (!isRunning(session) || !getTimerView(session, clock).isFinished || completionInFlight.current) return
 
     completionInFlight.current = true
-    void finishCurrentPhase().finally(() => {
+    void finishCurrentPhase(appData.settings.autoStartNext).finally(() => {
       completionInFlight.current = false
     })
   }, [clock, session])

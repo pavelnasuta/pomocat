@@ -6,6 +6,12 @@ function startOfDay(date: Date): Date {
   return start
 }
 
+function focusMinutes(item: SessionHistoryItem): number {
+  return item.actualDurationMs === undefined
+    ? item.durationMinutes
+    : item.actualDurationMs / (60 * 1_000)
+}
+
 function sumCompletedWithin(
   history: SessionHistoryItem[],
   start: Date,
@@ -14,7 +20,7 @@ function sumCompletedWithin(
   return history.reduce((total, item) => {
     const completedAt = new Date(item.completedAt)
     return item.phase === 'focus' && completedAt >= start && completedAt < end
-      ? total + item.durationMinutes
+      ? total + focusMinutes(item)
       : total
   }, 0)
 }

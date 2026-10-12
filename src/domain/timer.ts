@@ -120,14 +120,20 @@ export function completeCurrentPhase(
     const nextPhase =
       nextCompletedFocusRounds % settings.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
 
+    const plannedDurationMs = session.totalMs ?? durationMs('focus', settings)
+    const actualDurationMs = Math.max(0, plannedDurationMs - getTimerView(session, now).remainingMs)
+
     return {
       nextPhase,
       nextSession: sessionFor(nextPhase, now, settings, nextCompletedFocusRounds, session.taskName),
       historyItem: {
         id: `focus-${now}-${nextCompletedFocusRounds}`,
         phase: 'focus',
-        durationMinutes: settings.focusMinutes,
+        durationMinutes: actualDurationMs / minuteMs,
         completedAt: new Date(now).toISOString(),
+        actualDurationMs,
+        plannedDurationMs,
+        ...(session.taskName === undefined ? {} : { taskName: session.taskName }),
       },
     }
   }

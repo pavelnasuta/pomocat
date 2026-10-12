@@ -124,7 +124,9 @@ test('timer resumes from the persisted deadline after pause and reload, then rec
 
   await page.getByRole('button', { name: 'Завершить этап' }).click()
   await page.getByRole('button', { name: 'Статистика' }).click()
-  await expect(page.getByTestId('stats-today')).toContainText('25 мин')
+  const todayStats = page.getByTestId('stats-today')
+  await expect(todayStats).toContainText(/2[0-4] мин/)
+  await expect(todayStats).not.toContainText('25 мин')
   await expect(page.getByRole('list', { name: 'История сессий' })).toContainText('Фокус')
 })
 
