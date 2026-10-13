@@ -39,7 +39,10 @@ test('updates and clears a saved child name', async () => {
 
   await user.clear(screen.getByLabelText('Имя ребёнка'))
   await user.type(screen.getByLabelText('Имя ребёнка'), 'Лёва')
-  await user.click(screen.getByRole('button', { name: 'Сохранить имя' }))
+  const saveButton = screen.getByRole('button', { name: 'Сохранить имя' })
+  expect(saveButton).toContainElement(document.querySelector('.lucide-save'))
+  expect(saveButton).not.toHaveTextContent('Сохранить имя')
+  await user.click(saveButton)
 
   expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ childName: 'Лёва' }))
 
@@ -92,6 +95,15 @@ test.each([
 
   expect(input).toHaveValue(0)
   expect(onChange).not.toHaveBeenCalled()
+})
+
+test('selects an application color from the visual color settings', async () => {
+  const { onChange } = renderSettings()
+  const user = userEvent.setup()
+
+  await user.click(screen.getByLabelText('Черничный синий'))
+
+  expect(onChange).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'blueberry' }))
 })
 
 test('requires permission from the explicit notification setting action', async () => {

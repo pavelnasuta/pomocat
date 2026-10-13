@@ -1,10 +1,12 @@
 import { Check, Pause, Play, SkipForward, Volume2, VolumeX } from 'lucide-react'
 import { Mascot, type MascotPose } from '../../components/Mascot'
 import { useTranslation } from '../../i18n/useTranslation'
+import type { ThemeId } from '../../theme/themes'
 import type { PomodoroController } from './usePomodoroController'
 
 interface TimerScreenProps {
   controller: PomodoroController
+  theme?: ThemeId
 }
 
 function formatRemainingTime(remainingMs: number): string {
@@ -28,7 +30,7 @@ function mascotPose(controller: PomodoroController): MascotPose {
   return 'rest'
 }
 
-export function TimerScreen({ controller }: TimerScreenProps) {
+export function TimerScreen({ controller, theme = 'terracotta' }: TimerScreenProps) {
   const { t } = useTranslation(controller.locale)
   const isActive =
     controller.view.phase === 'focus' ||
@@ -72,6 +74,7 @@ export function TimerScreen({ controller }: TimerScreenProps) {
           animationsEnabled={controller.animationsEnabled}
           locale={controller.locale}
           pose={mascotPose(controller)}
+          theme={theme}
         />
         {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
         {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}

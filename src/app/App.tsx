@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { Cat } from 'lucide-react'
 import { BottomNav, type NavigationSection } from '../components/BottomNav'
 import { Onboarding } from '../components/Onboarding'
 import { clearAppData, loadAppData, saveAppData } from '../data/storage'
@@ -10,6 +11,8 @@ import type { AdviceArticleId } from '../features/advice/articles'
 import { StatsScreen } from '../features/stats/StatsScreen'
 import { TimerScreen } from '../features/timer/TimerScreen'
 import { usePomodoroController } from '../features/timer/usePomodoroController'
+import { getAllSessionCount } from '../domain/stats'
+import { appThemes } from '../theme/themes'
 import type { PomodoroSettings } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
 
@@ -26,6 +29,8 @@ export function App() {
   const [activeSection, setActiveSection] = useState<NavigationSection>('timer')
   const [activeAdviceArticle, setActiveAdviceArticle] = useState<AdviceArticleId>()
   const effectiveLocale = appData.settings.locale
+  const theme = appData.settings.theme ?? 'terracotta'
+  const screenKey = activeSection === 'advice' ? `advice-${activeAdviceArticle ?? 'list'}` : activeSection
   const { t } = useTranslation(effectiveLocale)
 
   useEffect(() => {
@@ -67,19 +72,29 @@ export function App() {
   }
 
   return (
-    <main className="app-shell" aria-label="pomokitty">
+    <main className="app-shell" aria-label="pomokitty" style={appThemes[theme].variables as CSSProperties}>
       <header className="app-shell__header">
         <span className="app-shell__brand">pomokitty</span>
-        <p className="app-shell__greeting">
-          {t('app.greeting')} {appData.settings.childName}
-        </p>
+        <div className="app-shell__profile">
+          <p className="app-shell__greeting">
+            {t('app.greeting')} {appData.settings.childName}
+          </p>
+          <div
+            className="app-shell__cat-total"
+            aria-label={t('app.totalCats', { count: getAllSessionCount(appData.history) })}
+          >
+            <Cat aria-hidden size={18} strokeWidth={1.8} />
+            <output>{getAllSessionCount(appData.history)}</output>
+          </div>
+        </div>
         {unsavedData && <p role="status">{t('app.unsavedData')}</p>}
       </header>
 
       <div className="app-shell__content">
+        <div className="app-shell__screen" data-screen={activeSection} key={screenKey}>
         {activeSection === 'timer' && (
           <section className="app-section app-section--timer" aria-label={t('navigation.timer')}>
-            <TimerScreen controller={timerController} />
+            <TimerScreen controller={timerController} theme={theme} />
           </section>
         )}
 
@@ -110,6 +125,7 @@ export function App() {
             <SettingsScreen data={appData} onChange={updateSettings} onClearData={clearData} onRequestNotifications={requestNotifications} />
           </section>
         )}
+        </div>
       </div>
 
       <BottomNav active={activeSection} locale={effectiveLocale} onChange={setActiveSection} />

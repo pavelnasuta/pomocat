@@ -80,6 +80,35 @@ test('restores an active session and renders its remaining time', () => {
   vi.useRealTimers()
 })
 
+test('wraps navigated content in a screen-transition surface', async () => {
+  const data = loadAppData(localStorage)
+  data.settings.childName = 'Маша'
+  saveAppData(localStorage, data)
+  const user = userEvent.setup()
+
+  render(<App />)
+  expect(document.querySelector('.app-shell__screen')).toHaveAttribute('data-screen', 'timer')
+
+  await user.click(screen.getByRole('button', { name: 'Настройки' }))
+
+  expect(document.querySelector('.app-shell__screen')).toHaveAttribute('data-screen', 'settings')
+})
+
+test('shows the all-time cat total directly below the child name', () => {
+  const data = loadAppData(localStorage)
+  data.settings.childName = 'Маша'
+  data.history = [
+    { id: 'legacy-full', phase: 'focus', durationMinutes: 25, completedAt: '2026-10-11T10:00:00.000Z' },
+    { id: 'partial', phase: 'focus', durationMinutes: 10, earnedCats: 0, completedAt: '2026-10-11T11:00:00.000Z' },
+    { id: 'double', phase: 'focus', durationMinutes: 50, earnedCats: 2, completedAt: '2026-10-11T12:00:00.000Z' },
+  ]
+  saveAppData(localStorage, data)
+
+  render(<App />)
+
+  expect(screen.getByLabelText('Всего котиков: 3')).toBeInTheDocument()
+})
+
 test('opens the advice list from navigation', async () => {
   const data = loadAppData(localStorage)
   data.settings.childName = 'Маша'

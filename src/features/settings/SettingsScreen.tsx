@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { Save } from 'lucide-react'
 import type { AppData, PomodoroSettings } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
 import { SoundSettings } from './SoundSettings'
+import { ThemeSettings } from './ThemeSettings'
 
 export interface SettingsScreenProps {
   data: AppData
@@ -72,7 +74,9 @@ export function SettingsScreen({ data, onChange, onClearData, onRequestNotificat
               value={name}
               onChange={(event) => setName(event.target.value)}
             />
-            <button type="button" onClick={saveName}>{t('settings.saveName')}</button>
+            <button type="button" aria-label={t('settings.saveName')} onClick={saveName}>
+              <Save aria-hidden size={20} strokeWidth={2} />
+            </button>
           </div>
           <label>
             <span>{t('settings.locale')}</span>
@@ -82,6 +86,12 @@ export function SettingsScreen({ data, onChange, onClearData, onRequestNotificat
             </select>
           </label>
         </fieldset>
+
+        <ThemeSettings
+          selectedTheme={settings.theme ?? 'terracotta'}
+          locale={data.settings.locale}
+          onSelect={(theme) => updateSettings({ theme })}
+        />
 
         <fieldset>
           <legend>{t('settings.timer')}</legend>

@@ -41,14 +41,15 @@ test('waits for the local non-looping chime to end before resolving a natural pe
   expect(chime.play).toHaveBeenCalledOnce()
 })
 
-test('creates a looping local audio element for the selected sound', async () => {
-  const audio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
+test('preloads and loops the selected local sound without waiting at its seam', async () => {
+  const audio = { loop: false, preload: 'metadata', volume: 0, pause: vi.fn(), play: vi.fn() }
   const createAudio = vi.fn(() => audio as unknown as HTMLAudioElement)
   const controller = new AudioController(createAudio)
 
   await controller.select('forestRain')
 
-  expect(createAudio).toHaveBeenCalledWith('/sounds/forest-rain.mp3')
+  expect(createAudio).toHaveBeenCalledWith('/sounds/forest-rain.opus')
+  expect(audio.preload).toBe('auto')
   expect(audio.loop).toBe(true)
 })
 
@@ -64,7 +65,7 @@ test('resolves selected audio within the Vite Pages base path', async () => {
 
     await controller.select('forestRain')
 
-    expect(createAudio).toHaveBeenCalledWith('/pomokitty/sounds/forest-rain.mp3')
+    expect(createAudio).toHaveBeenCalledWith('/pomokitty/sounds/forest-rain.opus')
   } finally {
     vi.unstubAllEnvs()
     vi.resetModules()
@@ -146,7 +147,7 @@ test('uses the browser Audio constructor by default', async () => {
     const controller = new AudioController()
     await controller.select('forestRain')
 
-    expect(browserAudio).toHaveBeenCalledWith('/sounds/forest-rain.mp3')
+    expect(browserAudio).toHaveBeenCalledWith('/sounds/forest-rain.opus')
   } finally {
     vi.unstubAllGlobals()
   }

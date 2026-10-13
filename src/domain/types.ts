@@ -1,3 +1,5 @@
+import type { ThemeId } from '../theme/themes'
+
 export type Locale = 'ru' | 'en'
 
 export type SoundId =
@@ -24,6 +26,7 @@ export interface PomodoroSettings {
   animationsEnabled: boolean
   notificationsEnabled: boolean
   keepScreenAwake: boolean
+  theme?: ThemeId
   selectedSound: SoundId
   soundEnabled?: boolean
   soundVolume: number

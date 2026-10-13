@@ -20,6 +20,7 @@ test('saves data that can be loaded again', () => {
       animationsEnabled: true,
       notificationsEnabled: false,
       keepScreenAwake: false,
+      theme: 'terracotta' as const,
       selectedSound: 'forestRain' as const,
       soundEnabled: true,
       soundVolume: 0.5,

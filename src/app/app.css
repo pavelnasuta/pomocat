@@ -120,7 +120,7 @@ input:focus-visible {
 
 .app-shell__header {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
   padding: max(20px, env(safe-area-inset-top)) 20px 16px;
@@ -139,8 +139,49 @@ input:focus-visible {
   font-size: 0.95rem;
 }
 
+.app-shell__profile {
+  display: grid;
+  justify-items: end;
+  gap: 4px;
+}
+
+.app-shell__cat-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: var(--color-terracotta);
+  background: color-mix(in srgb, var(--color-terracotta), transparent 90%);
+  font-weight: 800;
+}
+
+.app-shell__cat-total output {
+  font-variant-numeric: tabular-nums;
+}
+
 .app-shell__content {
   min-height: 0;
+  overflow: hidden;
+}
+
+.app-shell__screen {
+  height: 100%;
+  min-height: 0;
+  animation: app-screen-enter 180ms ease-out both;
+}
+
+@keyframes app-screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .app-section {
@@ -465,7 +506,7 @@ input:focus-visible {
   gap: 6px;
 }
 
-.settings-screen input:not([type='checkbox']):not([type='range']),
+.settings-screen input:not([type='checkbox']):not([type='range']):not([type='radio']),
 .settings-screen select {
   width: 100%;
   min-height: 44px;
@@ -498,6 +539,44 @@ input:focus-visible {
 .settings-screen__toggle input {
   inline-size: 20px;
   block-size: 20px;
+}
+
+.theme-settings__options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.theme-settings__option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-cream);
+  font-size: 0.8125rem;
+  line-height: 1.15;
+}
+
+.theme-settings__option:has(input:checked) {
+  border-color: var(--color-terracotta);
+  box-shadow: 0 0 0 1px var(--color-terracotta);
+}
+
+.theme-settings__option input {
+  position: absolute;
+  opacity: 0;
+}
+
+.theme-settings__swatch {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--color-surface);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--color-border);
 }
 
 .sound-settings input[type='range'] {
@@ -843,6 +922,7 @@ input:focus-visible {
     scroll-behavior: auto !important;
   }
 
+  .app-shell__screen,
   .mascot--active .mascot__image,
   .mascot--active .mascot__body,
   .mascot--active .mascot__eyes,

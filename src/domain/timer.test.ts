@@ -92,6 +92,13 @@ test('starts a configured short break after an ordinary focus completion', () =>
   expect(transition.nextSession.totalMs).toBe(5 * 60 * 1_000)
 })
 
+test('sends the first skipped focus to a short break, not a long break', () => {
+  const transition = completeCurrentPhase(startSession(0, settings), settings, 5 * 60 * 1_000, false)
+
+  expect(transition.nextPhase).toBe('shortBreak')
+  expect(transition.nextSession.totalMs).toBe(5 * 60 * 1_000)
+})
+
 test('records elapsed focus time without advancing the completed-round count when focus is skipped', () => {
   const session = { ...startSession(0, settings), completedFocusRounds: 3 }
 

@@ -1,3 +1,4 @@
+import { themeIds, type ThemeId } from '../theme/themes'
 import type {
   ActiveSession,
   AppData,
@@ -37,6 +38,10 @@ function isLocale(value: unknown): value is Locale {
   return value === 'ru' || value === 'en'
 }
 
+function isThemeId(value: unknown): value is ThemeId {
+  return typeof value === 'string' && themeIds.includes(value as ThemeId)
+}
+
 function isSoundId(value: unknown): value is SoundId {
   return typeof value === 'string' && soundIds.includes(value as SoundId)
 }
@@ -71,6 +76,7 @@ function isSettings(value: unknown): value is PomodoroSettings {
     typeof value.animationsEnabled === 'boolean' &&
     typeof value.notificationsEnabled === 'boolean' &&
     typeof value.keepScreenAwake === 'boolean' &&
+    (value.theme === undefined || isThemeId(value.theme)) &&
     isSoundId(value.selectedSound) &&
     isFiniteNumberInRange(value.soundVolume, 0, 1)
   )
@@ -133,6 +139,7 @@ function defaultSettings(): PomodoroSettings {
     animationsEnabled: true,
     notificationsEnabled: false,
     keepScreenAwake: false,
+    theme: 'terracotta',
     selectedSound: 'forestRain',
     soundEnabled: true,
     soundVolume: 0.5,
@@ -161,6 +168,7 @@ export function loadAppData(storage: Storage): AppData {
       settings: {
         ...safeData.settings,
         selectedSound: offeredSoundIds.includes(safeData.settings.selectedSound) ? safeData.settings.selectedSound : 'forestRain',
+        theme: safeData.settings.theme ?? 'terracotta',
         soundEnabled: safeData.settings.soundEnabled !== false,
       },
       catProgressMs: safeData.catProgressMs ?? 0,

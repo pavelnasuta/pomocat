@@ -4,6 +4,7 @@ import celebrateCat from '../assets/mascot/celebrate.png'
 import focusCat from '../assets/mascot/focus.png'
 import pauseCat from '../assets/mascot/pause.png'
 import sleepCat from '../assets/mascot/sleep.png'
+import type { ThemeId } from '../theme/themes'
 import { useTranslation } from '../i18n/useTranslation'
 
 export type MascotPose = 'rest' | 'work' | 'pause' | 'stretch' | 'sleep' | 'celebrate'
@@ -13,6 +14,7 @@ interface MascotProps {
   animationsEnabled: boolean
   locale: Locale
   pose?: MascotPose
+  theme?: ThemeId
 }
 
 const mascotImages: Record<MascotPose, string> = {
@@ -24,7 +26,28 @@ const mascotImages: Record<MascotPose, string> = {
   celebrate: celebrateCat,
 }
 
-export function Mascot({ active, animationsEnabled, locale, pose = 'rest' }: MascotProps) {
+const themedMascotImages = import.meta.glob('../assets/mascot/{lavender,sea-glass,sunny,blueberry}-*.png', {
+  eager: true,
+  import: 'default',
+}) as Record<string, string>
+
+const themeAssetPrefix: Partial<Record<ThemeId, string>> = {
+  lavender: 'lavender',
+  seaGlass: 'sea-glass',
+  sunny: 'sunny',
+  blueberry: 'blueberry',
+}
+
+const poseAssetName: Record<MascotPose, string> = {
+  rest: 'pause',
+  work: 'focus',
+  pause: 'pause',
+  stretch: 'break',
+  sleep: 'sleep',
+  celebrate: 'celebrate',
+}
+
+export function Mascot({ active, animationsEnabled, locale, pose = 'rest', theme = 'terracotta' }: MascotProps) {
   const { t } = useTranslation(locale)
   const isAnimated = animationsEnabled && (active || pose === 'celebrate')
 
@@ -37,7 +60,12 @@ export function Mascot({ active, animationsEnabled, locale, pose = 'rest' }: Mas
       role="img"
       aria-label={t('mascot.label')}
     >
-      <img className="mascot__image" src={mascotImages[pose]} alt="" draggable={false} />
+      <img
+        className="mascot__image"
+        src={theme === 'terracotta' ? mascotImages[pose] : themedMascotImages[`../assets/mascot/${themeAssetPrefix[theme]}-${poseAssetName[pose]}.png`]}
+        alt=""
+        draggable={false}
+      />
     </div>
   )
 }

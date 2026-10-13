@@ -119,7 +119,7 @@ export function completeCurrentPhase(
   if (session.phase === 'focus') {
     const nextCompletedFocusRounds = completedFocusRounds + (countFocusRound ? 1 : 0)
     const nextPhase =
-      nextCompletedFocusRounds % settings.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
+      countFocusRound && nextCompletedFocusRounds % settings.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
 
     const plannedDurationMs = session.totalMs ?? durationMs('focus', settings)
     const actualDurationMs = Math.max(0, plannedDurationMs - getTimerView(session, now).remainingMs)

@@ -1,10 +1,10 @@
 import type { SoundId } from '../domain/types'
 
 const soundFiles: Partial<Record<Exclude<SoundId, 'none'>, string>> = {
-  brownNoise: 'brown-noise.mp3',
-  forestRain: 'forest-rain.mp3',
-  ocean: 'ocean.mp3',
-  nightForest: 'night-forest.mp3',
+  brownNoise: 'brown-noise.opus',
+  forestRain: 'forest-rain.opus',
+  ocean: 'ocean.opus',
+  nightForest: 'night-forest.opus',
 }
 
 export class AudioController {
@@ -29,6 +29,7 @@ export class AudioController {
     }
 
     this.audio = this.createAudio(`${import.meta.env.BASE_URL}sounds/${soundFile}`)
+    this.audio.preload = 'auto'
     this.audio.loop = true
   }
 
