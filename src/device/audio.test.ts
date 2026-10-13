@@ -53,6 +53,34 @@ test('preloads and loops the selected local sound without waiting at its seam', 
   expect(audio.loop).toBe(true)
 })
 
+test('uses a decoded Web Audio buffer for sample-accurate ambient looping when available', async () => {
+  const fallbackAudio = { loop: false, preload: 'metadata', volume: 0, pause: vi.fn(), play: vi.fn().mockResolvedValue(undefined) }
+  const source = { buffer: undefined, loop: false, connect: vi.fn(), disconnect: vi.fn(), start: vi.fn(), stop: vi.fn() }
+  const gain = { gain: { value: 0 }, connect: vi.fn() }
+  const audioContext = {
+    resume: vi.fn().mockResolvedValue(undefined),
+    decodeAudioData: vi.fn().mockResolvedValue({}),
+    createGain: vi.fn(() => gain),
+    createBufferSource: vi.fn(() => source),
+    destination: {},
+  }
+  const fetchAudio = vi.fn().mockResolvedValue({ ok: true, arrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)) })
+  const ControllerWithWebAudio = AudioController as unknown as new (...args: unknown[]) => AudioController
+  const controller = new ControllerWithWebAudio(
+    () => fallbackAudio as unknown as HTMLAudioElement,
+    () => audioContext,
+    fetchAudio,
+  )
+
+  await controller.select('forestRain')
+  await expect(controller.start()).resolves.toBe('playing')
+
+  expect(fetchAudio).toHaveBeenCalledWith('/sounds/forest-rain.opus')
+  expect(source.loop).toBe(true)
+  expect(source.start).toHaveBeenCalledOnce()
+  expect(fallbackAudio.play).not.toHaveBeenCalled()
+})
+
 test('resolves selected audio within the Vite Pages base path', async () => {
   vi.stubEnv('BASE_URL', '/pomokitty/')
   vi.resetModules()

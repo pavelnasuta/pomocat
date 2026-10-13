@@ -9,10 +9,11 @@ test('shows a Russian list of practical time-management articles for children', 
 
   expect(screen.getByRole('heading', { name: 'Советы для продуктивного дня' })).toBeInTheDocument()
   expect(screen.getByRole('list', { name: 'Статьи о времени' })).toBeInTheDocument()
-  expect(screen.getAllByRole('listitem')).toHaveLength(5)
-  expect(screen.getByText('Как начать без уговоров')).toBeInTheDocument()
-  expect(screen.getByText('Маленькие шаги вместо большой задачи')).toBeInTheDocument()
-  await user.click(screen.getByRole('button', { name: /Как начать без уговоров/ }))
+  expect(screen.getAllByRole('listitem')).toHaveLength(6)
+  const firstArticle = screen.getAllByRole('listitem')[0]
+  expect(firstArticle).toHaveTextContent('Как пользоваться pomokitty')
+  await user.click(screen.getByRole('button', { name: /Как пользоваться pomokitty/ }))
 
-  expect(onOpen).toHaveBeenCalledWith('start')
+  expect(onOpen).toHaveBeenCalledWith('pomodoro')
+  expect(screen.getByText('Как начать без уговоров')).toBeInTheDocument()
 })

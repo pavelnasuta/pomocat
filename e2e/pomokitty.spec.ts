@@ -11,12 +11,41 @@ const requiredDiagnosticViewports = [
   { width: 393, height: 852 },
 ] as const
 
+async function completeOnboarding(page: import('@playwright/test').Page, name = 'Маша') {
+  await page.getByLabel('Как тебя зовут?').fill(name)
+  await page.getByRole('button', { name: 'Дальше' }).click()
+  await page.getByRole('button', { name: 'Понятно' }).click()
+  await page.getByRole('button', { name: 'Начать первую сессию' }).click()
+}
+
+test('keeps every onboarding screen inside a 320 by 568 viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 })
+  await page.goto('/pomokitty/')
+
+  async function expectViewportFit() {
+    const geometry = await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      height: document.documentElement.scrollHeight,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    }))
+    expect(geometry.width).toBe(geometry.viewportWidth)
+    expect(geometry.height).toBeLessThanOrEqual(geometry.viewportHeight)
+  }
+
+  await expectViewportFit()
+  await page.getByLabel('Как тебя зовут?').fill('Маша')
+  await page.getByRole('button', { name: 'Дальше' }).click()
+  await expectViewportFit()
+  await page.getByRole('button', { name: 'Понятно' }).click()
+  await expectViewportFit()
+})
+
 for (const viewport of requiredDiagnosticViewports) {
   test(`keeps the timer unscrolled and non-overlapping at ${viewport.width} by ${viewport.height}`, async ({ page }) => {
     await page.setViewportSize(viewport)
     await page.goto('/pomokitty/')
-    await page.getByLabel('Как тебя зовут?').fill('Маша')
-    await page.getByRole('button', { name: 'Продолжить' }).click()
+    await completeOnboarding(page)
 
     const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
       const status = timerScreen.querySelector('.timer-screen__status')
@@ -46,8 +75,7 @@ test('first mobile visit stores the Russian child name and keeps the timer insid
   await page.setViewportSize({ width: 375, height: 667 })
   await page.goto('/pomokitty/')
 
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
 
   await expect(page.getByRole('main', { name: 'pomokitty' })).toBeVisible()
   await expect(page.getByText('Привет, Маша')).toBeVisible()
@@ -82,8 +110,7 @@ test('first mobile visit stores the Russian child name and keeps the timer insid
 test('timer resumes from the persisted deadline after pause and reload, then reset returns to the start at 412 by 915', async ({ page }) => {
   await page.setViewportSize({ width: 412, height: 915 })
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
 
   await page.getByRole('button', { name: 'Начать' }).click()
   await expect(page.getByRole('button', { name: 'Пауза' })).toBeVisible()
@@ -152,8 +179,7 @@ test('settings persist sound and language choices, respect reduced motion, and r
   await page.setViewportSize({ width: 412, height: 915 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await page.getByRole('button', { name: 'Начать' }).click()
   await expect(page.locator('.mascot__image')).toHaveCSS('animation-name', 'none')
 
@@ -183,8 +209,7 @@ test('settings persist sound and language choices, respect reduced motion, and r
 
 test('honors manual and automatic expiry transitions', async ({ page }) => {
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await page.getByRole('button', { name: 'Начать' }).click()
   await page.evaluate(() => {
     const data = JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}')
@@ -199,8 +224,7 @@ test('honors manual and automatic expiry transitions', async ({ page }) => {
 
   await page.evaluate(() => localStorage.clear())
   await page.reload()
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await page.getByRole('button', { name: 'Настройки' }).click()
   await page.getByLabel('Начинать следующий этап автоматически').check()
   await page.getByRole('button', { name: 'Таймер' }).click()
@@ -234,6 +258,7 @@ test('plays a completion chime before restoring selected audio and focus wake lo
       pause() {}
     }
     Object.defineProperty(window, 'Audio', { configurable: true, value: TestAudio })
+    Object.defineProperty(window, 'AudioContext', { configurable: true, value: undefined })
     Object.defineProperty(navigator, 'wakeLock', {
       configurable: true,
       value: {
@@ -248,8 +273,7 @@ test('plays a completion chime before restoring selected audio and focus wake lo
     })
   })
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await page.getByRole('button', { name: 'Настройки' }).click()
   await page.getByLabel('Фокус, минуты').fill('1')
   await page.getByLabel('Короткий перерыв, минуты').fill('1')
@@ -292,8 +316,7 @@ test('requests notification permission only from settings and sends one completi
     Object.defineProperty(window, 'Notification', { configurable: true, value: TestNotification })
   })
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await page.getByRole('button', { name: 'Настройки' }).click()
   await page.getByLabel('Показывать уведомления').check()
   await page.getByRole('button', { name: 'Таймер' }).click()
@@ -311,8 +334,7 @@ test('continues with a localized unsaved-data state when browser storage rejects
     }
   })
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await expect(page.getByRole('main', { name: 'pomokitty' })).toBeVisible()
   await expect(page.getByText('Не удалось сохранить изменения на этом устройстве.', { exact: true })).toBeVisible()
 })
@@ -334,8 +356,7 @@ test('reconciles live audio and wake lock settings and safely resets malformed p
     Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: wakeLock })
   })
   await page.goto('/pomokitty/')
-  await page.getByLabel('Как тебя зовут?').fill('Маша')
-  await page.getByRole('button', { name: 'Продолжить' }).click()
+  await completeOnboarding(page)
   await page.getByRole('button', { name: 'Начать' }).click()
   await page.getByRole('button', { name: 'Настройки' }).click()
   await page.getByLabel('Фоновый звук').selectOption('forestRain')

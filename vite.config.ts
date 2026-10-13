@@ -17,7 +17,7 @@ export default defineConfig(({ command }) => ({
         name: 'pomokitty',
         short_name: 'pomokitty',
         display: 'standalone',
-        theme_color: '#fffaf1',
+        theme_color: '#99432c',
         background_color: '#fffaf1',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

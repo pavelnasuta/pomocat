@@ -53,10 +53,40 @@ beforeEach(() => {
   saveAppData(localStorage, data)
 })
 
-test('shows onboarding before a child name has been saved', () => {
+test('shows the first onboarding step before a child name has been saved', () => {
   render(<App />)
 
-  expect(screen.getByRole('heading', { name: 'Как тебя зовут?' })).toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Привет! Я pomokitty' })).toBeInTheDocument()
+})
+
+test('persists the name, selected sound, and theme after onboarding', async () => {
+  const user = userEvent.setup()
+  render(<App />)
+
+  await user.type(screen.getByLabelText('Как тебя зовут?'), 'Маша')
+  await user.click(screen.getByRole('button', { name: 'Дальше' }))
+  await user.click(screen.getByRole('button', { name: 'Понятно' }))
+  await user.click(screen.getByRole('button', { name: 'Ночной лес' }))
+  await user.click(screen.getByRole('button', { name: 'Морское стекло' }))
+  await user.click(screen.getByRole('button', { name: 'Начать первую сессию' }))
+
+  expect(loadAppData(localStorage).settings).toMatchObject({
+    childName: 'Маша',
+    selectedSound: 'nightForest',
+    theme: 'seaGlass',
+  })
+  expect(screen.getByText('Привет, Маша')).toBeInTheDocument()
+})
+
+test('applies a contrasting status-bar color for the selected app theme', () => {
+  const data = loadAppData(localStorage)
+  data.settings.childName = 'Маша'
+  data.settings.theme = 'seaGlass'
+  saveAppData(localStorage, data)
+
+  render(<App />)
+
+  expect(document.querySelector('meta[name="theme-color"]')).toHaveAttribute('content', '#1b635b')
 })
 
 test('restores an active session and renders its remaining time', () => {
@@ -152,7 +182,7 @@ test('clears storage only after confirmation and returns to onboarding', async (
   expect(loadAppData(localStorage).history).toHaveLength(1)
   await user.click(screen.getByRole('button', { name: 'Да, очистить данные' }))
 
-  expect(screen.getByRole('heading')).toHaveTextContent(/Как тебя зовут\?|What is your name\?/)
+  expect(screen.getByRole('heading')).toHaveTextContent(/Привет! Я pomokitty|Hi, I'm pomokitty/)
   expect(loadAppData(localStorage).history).toEqual([])
   expect(loadAppData(localStorage).settings.childName).toBeUndefined()
 })
@@ -182,10 +212,10 @@ test('clears active focus resources before showing onboarding', async () => {
     expect(deviceMocks.audio.stop).toHaveBeenCalledOnce()
     expect(deviceMocks.wakeLock.release).toHaveBeenCalledOnce()
   })
-  expect(screen.queryByRole('heading', { name: /Как тебя зовут\?|What is your name\?/ })).not.toBeInTheDocument()
+  expect(screen.queryByRole('heading', { name: /Привет! Я pomokitty|Hi, I'm pomokitty/ })).not.toBeInTheDocument()
 
   release.resolve(undefined)
 
-  expect(await screen.findByRole('heading', { name: /Как тебя зовут\?|What is your name\?/ })).toBeInTheDocument()
+  expect(await screen.findByRole('heading', { name: /Привет! Я pomokitty|Hi, I'm pomokitty/ })).toBeInTheDocument()
   expect(loadAppData(localStorage).activeSession).toBeUndefined()
 })

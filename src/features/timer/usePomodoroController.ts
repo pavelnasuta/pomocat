@@ -307,7 +307,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
   }
 
   async function skip() {
-    await finishCurrentPhase(true, false, true, false)
+    await finishCurrentPhase(true, false, true)
   }
 
   async function reset() {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Save } from 'lucide-react'
+import { Save, Share2 } from 'lucide-react'
 import type { AppData, PomodoroSettings } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
 import { SoundSettings } from './SoundSettings'
@@ -29,6 +29,7 @@ export function SettingsScreen({ data, onChange, onClearData, onRequestNotificat
   const [numericValues, setNumericValues] = useState(() => numericInputs(data.settings))
   const [name, setName] = useState(data.settings.childName ?? '')
   const [confirmingClear, setConfirmingClear] = useState(false)
+  const [shareStatus, setShareStatus] = useState<'copied' | 'unavailable'>()
 
   useEffect(() => {
     setSettings(data.settings)
@@ -53,6 +54,27 @@ export function SettingsScreen({ data, onChange, onClearData, onRequestNotificat
   function saveName() {
     const childName = name.trim() || undefined
     updateSettings({ childName })
+  }
+
+  async function shareApp() {
+    const shareData = { title: 'pomokitty', text: t('settings.shareText'), url: window.location.href }
+    setShareStatus(undefined)
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+        return
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareData.url)
+      setShareStatus('copied')
+    } catch {
+      setShareStatus('unavailable')
+    }
   }
 
   function updateNumericSetting(setting: NumericSetting, value: string) {
@@ -135,6 +157,23 @@ export function SettingsScreen({ data, onChange, onClearData, onRequestNotificat
             <input type="checkbox" checked={settings.keepScreenAwake} onChange={(event) => updateSettings({ keepScreenAwake: event.target.checked })} />
             <span>{t('settings.wakeLock')}</span>
           </label>
+        </fieldset>
+
+        <fieldset className="settings-screen__share">
+          <legend>{t('settings.share')}</legend>
+          <p>{t('settings.shareDescription')}</p>
+          <button type="button" onClick={() => void shareApp()}>
+            <Share2 aria-hidden size={19} strokeWidth={2} />
+            {t('settings.shareAction')}
+          </button>
+          {shareStatus && <p role="status">{t(shareStatus === 'copied' ? 'settings.shareCopied' : 'settings.shareUnavailable')}</p>}
+        </fieldset>
+
+        <fieldset className="settings-screen__credit">
+          <legend>{t('settings.credit')}</legend>
+          <p>{t('settings.creditDescription')}</p>
+          <a href="https://t.me/pavelnasuta" target="_blank" rel="noreferrer">@pavelnasuta</a>
+          <a href="https://t.me/niimozgii" target="_blank" rel="noreferrer">{t('settings.creditChannel')}</a>
         </fieldset>
 
         <fieldset className="settings-screen__danger">

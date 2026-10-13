@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Cat } from 'lucide-react'
 import { BottomNav, type NavigationSection } from '../components/BottomNav'
-import { Onboarding } from '../components/Onboarding'
+import { Onboarding, type OnboardingResult } from '../components/Onboarding'
 import { clearAppData, loadAppData, saveAppData } from '../data/storage'
 import { NotificationController } from '../device/notifications'
 import { SettingsScreen } from '../features/settings/SettingsScreen'
@@ -37,6 +37,16 @@ export function App() {
     document.documentElement.lang = effectiveLocale
   }, [effectiveLocale])
 
+  useEffect(() => {
+    let themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+    if (!themeColor) {
+      themeColor = document.createElement('meta')
+      themeColor.name = 'theme-color'
+      document.head.append(themeColor)
+    }
+    themeColor.content = appThemes[theme].statusBarColor
+  }, [theme])
+
   function updateAppData(nextAppData: typeof appData) {
     setUnsavedData(!saveAppData(localStorage, nextAppData))
     setAppData(nextAppData)
@@ -46,12 +56,15 @@ export function App() {
     return (await notifications.requestPermission()) === 'granted'
   }
 
-  function completeOnboarding(name: string) {
+  function completeOnboarding({ childName, selectedSound, theme }: OnboardingResult) {
     updateAppData({
       ...appData,
       settings: {
         ...appData.settings,
-        childName: name,
+        childName,
+        selectedSound,
+        soundEnabled: true,
+        theme,
       },
     })
   }

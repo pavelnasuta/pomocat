@@ -4,6 +4,7 @@ export type ThemeId = typeof themeIds[number]
 
 interface AppTheme {
   accent: string
+  statusBarColor: string
   variables: Record<string, string>
   labelKey:
     | 'settings.theme.terracotta'
@@ -16,6 +17,7 @@ interface AppTheme {
 export const appThemes: Record<ThemeId, AppTheme> = {
   terracotta: {
     accent: '#c96345',
+    statusBarColor: '#99432c',
     labelKey: 'settings.theme.terracotta',
     variables: {
       '--color-cream': '#fff8ea',
@@ -30,6 +32,7 @@ export const appThemes: Record<ThemeId, AppTheme> = {
   },
   lavender: {
     accent: '#8f5aa8',
+    statusBarColor: '#633a78',
     labelKey: 'settings.theme.lavender',
     variables: {
       '--color-cream': '#fcf8ff',
@@ -44,6 +47,7 @@ export const appThemes: Record<ThemeId, AppTheme> = {
   },
   seaGlass: {
     accent: '#2c8a7d',
+    statusBarColor: '#1b635b',
     labelKey: 'settings.theme.seaGlass',
     variables: {
       '--color-cream': '#eff9f7',
@@ -58,6 +62,7 @@ export const appThemes: Record<ThemeId, AppTheme> = {
   },
   sunny: {
     accent: '#d88721',
+    statusBarColor: '#91580f',
     labelKey: 'settings.theme.sunny',
     variables: {
       '--color-cream': '#fff8d8',
@@ -72,6 +77,7 @@ export const appThemes: Record<ThemeId, AppTheme> = {
   },
   blueberry: {
     accent: '#3d73c7',
+    statusBarColor: '#285595',
     labelKey: 'settings.theme.blueberry',
     variables: {
       '--color-cream': '#f3f7ff',

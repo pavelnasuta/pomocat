@@ -47,13 +47,22 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
     name: 'pomokitty',
     short_name: 'pomokitty',
     display: 'standalone',
-    theme_color: '#fffaf1',
+    theme_color: '#99432c',
     icons: [
       { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
       { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
   })
 }, 15_000)
+
+test('configures edge-to-edge status bars for cutout screens', () => {
+  const index = readFileSync(`${projectRoot}index.html`, 'utf8')
+
+  expect(index).toContain('viewport-fit=cover')
+  expect(index).toContain('name="apple-mobile-web-app-capable" content="yes"')
+  expect(index).toContain('name="apple-mobile-web-app-status-bar-style" content="black-translucent"')
+  expect(index).toContain('name="theme-color" content="#99432c"')
+})
 
 test('precaches only the approved background audio in the service worker', () => {
   const { serviceWorker } = buildPwa()

@@ -133,6 +133,28 @@ test('updates notifications and wake lock preferences without showing a mascot a
   }))
 })
 
+test('renders a share action and the idea-and-implementation credit above data deletion', async () => {
+  const { onClearData } = renderSettings()
+  const share = vi.fn().mockResolvedValue(undefined)
+  const descriptor = Object.getOwnPropertyDescriptor(navigator, 'share')
+  Object.defineProperty(navigator, 'share', { configurable: true, value: share })
+  const user = userEvent.setup()
+
+  try {
+    await user.click(screen.getByRole('button', { name: 'Поделиться с другом' }))
+
+    expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: 'pomokitty', url: window.location.href }))
+    expect(screen.getByRole('link', { name: '@pavelnasuta' })).toHaveAttribute('href', 'https://t.me/pavelnasuta')
+    expect(screen.getByRole('link', { name: 'НИИ МОЗГИ' })).toHaveAttribute('href', 'https://t.me/niimozgii')
+    expect(screen.getByText('Идея и реализация')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Очистить все данные' })).toBeInTheDocument()
+    expect(onClearData).not.toHaveBeenCalled()
+  } finally {
+    if (descriptor) Object.defineProperty(navigator, 'share', descriptor)
+    else Reflect.deleteProperty(navigator, 'share')
+  }
+})
+
 test('requires explicit confirmation before clearing saved data', async () => {
   const { onClearData } = renderSettings()
   const user = userEvent.setup()

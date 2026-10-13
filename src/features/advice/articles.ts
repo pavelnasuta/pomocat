@@ -1,14 +1,16 @@
+import pomodoroCat from '../../assets/mascot/focus.png'
 import startCat from '../../assets/advice/start.png'
 import smallStepsCat from '../../assets/advice/small-steps.png'
 import breaksCat from '../../assets/advice/breaks.png'
 import distractionsCat from '../../assets/advice/distractions.png'
 import motivationCat from '../../assets/advice/motivation.png'
 
-export const articleIds = ['start', 'smallSteps', 'breaks', 'distractions', 'motivation'] as const
+export const articleIds = ['pomodoro', 'start', 'smallSteps', 'breaks', 'distractions', 'motivation'] as const
 
 export type AdviceArticleId = (typeof articleIds)[number]
 
 export const articleImages: Record<AdviceArticleId, string> = {
+  pomodoro: pomodoroCat,
   start: startCat,
   smallSteps: smallStepsCat,
   breaks: breaksCat,

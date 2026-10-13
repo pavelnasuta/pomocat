@@ -248,6 +248,24 @@ test('banks skipped focus time and awards a cat after one full focus duration', 
   })
 })
 
+test('starts a long break after the fourth skipped focus period', async () => {
+  const data = loadAppData(localStorage)
+  data.activeSession = startSession(0, data.settings)
+  saveAppData(localStorage, data)
+  const { result } = renderHook(() => usePomodoroController({ now: () => 0 }))
+
+  for (let focusCount = 1; focusCount <= 4; focusCount += 1) {
+    await act(async () => { await result.current.skip() })
+    if (focusCount < 4) {
+      expect(result.current.view.phase).toBe('shortBreak')
+      await act(async () => { await result.current.skip() })
+      expect(result.current.view.phase).toBe('focus')
+    }
+  }
+
+  expect(result.current.view.phase).toBe('longBreak')
+})
+
 test('uses a fixed 25-minute threshold after the child changes focus duration', async () => {
   let now = 5 * 60 * 1_000
   const data = loadAppData(localStorage)

@@ -79,7 +79,7 @@ test('production Pages app and local audio remain available offline after servic
     await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null), { timeout: 30_000 }).toBe(true)
     await context.setOffline(true)
     await page.reload()
-    await expect(page.getByRole('heading', { name: 'Как тебя зовут?' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Привет! Я pomokitty' })).toBeVisible()
     await expect.poll(() => page.evaluate(async () => (await fetch('/pomokitty/sounds/forest-rain.opus')).ok)).toBe(true)
   } finally {
     await context.close()
