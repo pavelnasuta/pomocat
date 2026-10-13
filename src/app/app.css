@@ -250,14 +250,42 @@ input:focus-visible {
   transition: width 250ms linear;
 }
 
-.timer-screen__sound-toggle {
+.timer-screen__sound-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.timer-screen__sound-toggle,
+.timer-screen__sound-option {
   display: grid;
-  width: 44px;
+  width: 40px;
   min-height: 44px;
   place-items: center;
   padding: 0;
-  color: var(--color-terracotta);
   background: transparent;
+}
+
+.timer-screen__sound-toggle {
+  width: 44px;
+  color: var(--color-terracotta);
+}
+
+.timer-screen__sound-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 3px;
+  background: var(--color-border);
+}
+
+.timer-screen__sound-option {
+  color: color-mix(in srgb, var(--color-dark-blue), transparent 62%);
+}
+
+.timer-screen__sound-option--active {
+  border-radius: 12px;
+  color: var(--color-terracotta);
+  background: color-mix(in srgb, var(--color-terracotta), transparent 88%);
 }
 
 .timer-screen__task {

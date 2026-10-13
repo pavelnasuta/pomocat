@@ -11,7 +11,7 @@ import {
   startSession,
   type TimerView,
 } from '../../domain/timer'
-import type { ActiveSession, AppData, Locale, PomodoroSettings } from '../../domain/types'
+import type { ActiveSession, AppData, Locale, PomodoroSettings, SoundId } from '../../domain/types'
 import { dictionaries } from '../../i18n/dictionaries'
 
 type AudioPort = Pick<AudioController, 'start' | 'stop'> &
@@ -23,12 +23,14 @@ export interface PomodoroController {
   locale: Locale
   animationsEnabled: boolean
   soundEnabled: boolean
+  selectedSound: SoundId
   view: TimerView
   taskName: string
   wakeLockStatus: 'active' | 'unavailable' | 'idle'
   audioStatus: 'idle' | 'blocked'
   setTaskName(value: string): void
   toggleSound(): void
+  selectSound(sound: SoundId): void
   start(): Promise<void>
   pause(): Promise<void>
   resume(): Promise<void>
@@ -215,6 +217,17 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     options.onAppDataChange?.(nextAppData)
   }
 
+  function selectSound(selectedSound: SoundId) {
+    const nextAppData = {
+      ...appData,
+      settings: { ...appData.settings, selectedSound, soundEnabled: true },
+    }
+    const saved = saveAppData(storage, nextAppData)
+    options.onPersistenceChange?.(!saved)
+    setAppData(nextAppData)
+    options.onAppDataChange?.(nextAppData)
+  }
+
   async function start() {
     const nextSession = startSession(now(), appData.settings, taskName || undefined)
     const operation = activationOperation.current + 1
@@ -327,12 +340,14 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     locale: appData.settings.locale,
     animationsEnabled: appData.settings.animationsEnabled,
     soundEnabled: appData.settings.soundEnabled !== false,
+    selectedSound: appData.settings.selectedSound,
     view: session ? getTimerView(session, clock) : idleView(),
     taskName,
     wakeLockStatus,
     audioStatus,
     setTaskName,
     toggleSound,
+    selectSound,
     start,
     pause,
     resume,

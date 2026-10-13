@@ -540,6 +540,24 @@ test('mutes and restores the selected background sound from the timer control', 
   expect(audio.select).toHaveBeenLastCalledWith('ocean')
 })
 
+test('selects a quick background sound, persists it, and turns audio back on', async () => {
+  const audio = { select: vi.fn().mockResolvedValue(undefined), setVolume: vi.fn(), start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
+  const data = loadAppData(localStorage)
+  data.settings.soundEnabled = false
+  data.settings.selectedSound = 'forestRain'
+  saveAppData(localStorage, data)
+  const { result } = renderHook(() => usePomodoroController({ audio }))
+
+  await act(async () => { await result.current.start() })
+  await act(async () => {
+    result.current.selectSound('nightForest')
+    await Promise.resolve()
+  })
+
+  expect(loadAppData(localStorage).settings).toMatchObject({ selectedSound: 'nightForest', soundEnabled: true })
+  expect(audio.select).toHaveBeenLastCalledWith('nightForest')
+})
+
 test('reconciles running audio and wake lock when settings change', async () => {
   const audio = { select: vi.fn().mockResolvedValue(undefined), setVolume: vi.fn(), start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
   const wakeLock = { acquire: vi.fn().mockResolvedValue('active'), release: vi.fn().mockResolvedValue(undefined) }

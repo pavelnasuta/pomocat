@@ -11,6 +11,7 @@ function controllerFor(
     locale,
     animationsEnabled: true,
     soundEnabled: true,
+    selectedSound: 'forestRain',
     view: {
       phase,
       remainingMs: 24 * 60 * 1_000,
@@ -23,6 +24,7 @@ function controllerFor(
     audioStatus: 'idle',
     setTaskName: vi.fn(),
     toggleSound: vi.fn(),
+    selectSound: vi.fn(),
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
@@ -62,6 +64,22 @@ test('toggles the terracotta background-sound control below timer progress', asy
   await user.click(toggle)
 
   expect(controller.toggleSound).toHaveBeenCalledOnce()
+})
+
+test('shows one active quick background sound and lets the child switch it', async () => {
+  const controller = Object.assign(controllerFor(), {
+    selectedSound: 'forestRain',
+    selectSound: vi.fn(),
+  })
+  const user = userEvent.setup()
+
+  render(<TimerScreen controller={controller} />)
+
+  expect(screen.getByRole('button', { name: 'Дождь по листве' })).toHaveAttribute('aria-pressed', 'true')
+  expect(screen.getByRole('button', { name: 'Коричневый шум' })).toHaveAttribute('aria-pressed', 'false')
+  await user.click(screen.getByRole('button', { name: 'Океан без птиц' }))
+
+  expect(controller.selectSound).toHaveBeenCalledWith('ocean')
 })
 
 test('uses the mascot collection across timer phases', () => {

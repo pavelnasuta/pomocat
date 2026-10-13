@@ -1,5 +1,6 @@
-import { Check, Pause, Play, SkipForward, Volume2, VolumeX } from 'lucide-react'
+import { AudioWaveform, Check, CloudRain, Pause, Play, SkipForward, Trees, Volume2, VolumeX, Waves } from 'lucide-react'
 import { Mascot, type MascotPose } from '../../components/Mascot'
+import type { SoundId } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { ThemeId } from '../../theme/themes'
 import type { PomodoroController } from './usePomodoroController'
@@ -8,6 +9,15 @@ interface TimerScreenProps {
   controller: PomodoroController
   theme?: ThemeId
 }
+
+type QuickSoundId = Extract<SoundId, 'brownNoise' | 'forestRain' | 'ocean' | 'nightForest'>
+
+const quickSoundOptions: ReadonlyArray<{ id: QuickSoundId; icon: typeof AudioWaveform }> = [
+  { id: 'brownNoise', icon: AudioWaveform },
+  { id: 'forestRain', icon: CloudRain },
+  { id: 'ocean', icon: Waves },
+  { id: 'nightForest', icon: Trees },
+]
 
 function formatRemainingTime(remainingMs: number): string {
   const remainingSeconds = Math.ceil(remainingMs / 1_000)
@@ -42,6 +52,9 @@ export function TimerScreen({ controller, theme = 'terracotta' }: TimerScreenPro
   const isResettable = controller.view.phase !== 'idle'
   const PrimaryIcon = controller.view.phase === 'paused' || !isActive ? Play : Pause
   const SoundIcon = controller.soundEnabled ? Volume2 : VolumeX
+  const selectedQuickSound = quickSoundOptions.some(({ id }) => id === controller.selectedSound)
+    ? controller.selectedSound as QuickSoundId
+    : 'forestRain'
 
   return (
     <section className="timer-screen" aria-label={t('navigation.timer')}>
@@ -58,14 +71,33 @@ export function TimerScreen({ controller, theme = 'terracotta' }: TimerScreenPro
         >
           <span style={{ width: `${progress}%` }} />
         </div>
-        <button
-          type="button"
-          className="timer-screen__sound-toggle"
-          aria-label={t(controller.soundEnabled ? 'timer.soundOff' : 'timer.soundOn')}
-          onClick={controller.toggleSound}
-        >
-          <SoundIcon aria-hidden size={24} strokeWidth={2} />
-        </button>
+        <div className="timer-screen__sound-controls" role="group" aria-label={t('settings.soundChoice')}>
+          <button
+            type="button"
+            className="timer-screen__sound-toggle"
+            aria-label={t(controller.soundEnabled ? 'timer.soundOff' : 'timer.soundOn')}
+            aria-pressed={controller.soundEnabled}
+            onClick={controller.toggleSound}
+          >
+            <SoundIcon aria-hidden size={24} strokeWidth={2} />
+          </button>
+          <span className="timer-screen__sound-divider" aria-hidden />
+          {quickSoundOptions.map(({ id, icon: Icon }) => {
+            const isSelected = controller.soundEnabled && selectedQuickSound === id
+            return (
+              <button
+                key={id}
+                type="button"
+                className={`timer-screen__sound-option${isSelected ? ' timer-screen__sound-option--active' : ''}`}
+                aria-label={t(`settings.sound.${id}`)}
+                aria-pressed={isSelected}
+                onClick={() => controller.selectSound(id)}
+              >
+                <Icon aria-hidden size={21} strokeWidth={2} />
+              </button>
+            )
+          })}
+        </div>
       </header>
 
       <div className="timer-screen__actions">
