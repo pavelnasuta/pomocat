@@ -32,6 +32,30 @@ export class AudioController {
     this.audio.loop = true
   }
 
+  async playCompletionSound(volume: number): Promise<'playing' | 'blocked'> {
+    const chime = this.createAudio(`${import.meta.env.BASE_URL}sounds/ding.mp3`)
+    chime.loop = false
+    chime.volume = Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0
+
+    return new Promise((resolve) => {
+      let settled = false
+      const finish = (status: 'playing' | 'blocked') => {
+        if (settled) return
+        settled = true
+        window.clearTimeout(fallback)
+        resolve(status)
+      }
+      const fallback = window.setTimeout(() => finish('playing'), 2_000)
+      const play = () => void chime.play().then(() => {
+        if (typeof chime.addEventListener !== 'function') finish('playing')
+      }, () => finish('blocked'))
+      if (typeof chime.addEventListener === 'function') {
+        chime.addEventListener('ended', () => finish('playing'), { once: true })
+      }
+      play()
+    })
+  }
+
   setVolume(volume: number): void {
     if (this.audio) {
       this.audio.volume = Number.isFinite(volume) ? Math.min(1, Math.max(0, volume)) : 0

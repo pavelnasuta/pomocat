@@ -58,7 +58,7 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
 test('precaches only the approved background audio in the service worker', () => {
   const { serviceWorker } = buildPwa()
 
-  for (const sound of ['brown-noise', 'forest-rain', 'ocean', 'night-forest']) {
+  for (const sound of ['brown-noise', 'forest-rain', 'ocean', 'night-forest', 'ding']) {
     expect(serviceWorker).toContain(`sounds/${sound}.mp3`)
   }
   for (const removedSound of ['rain', 'white-noise', 'distant-thunder']) {

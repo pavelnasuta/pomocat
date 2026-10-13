@@ -14,6 +14,33 @@ test('returns blocked when browser audio playback rejects', async () => {
   await expect(controller.start()).resolves.toBe('blocked')
 })
 
+test('waits for the local non-looping chime to end before resolving a natural period finish', async () => {
+  let complete!: () => void
+  const chime = {
+    loop: true,
+    volume: 0,
+    pause: vi.fn(),
+    addEventListener: vi.fn((_event: string, listener: () => void) => { complete = listener }),
+    play: vi.fn().mockResolvedValue(undefined),
+  }
+  const createAudio = vi.fn(() => chime as unknown as HTMLAudioElement)
+  const controller = new AudioController(createAudio)
+  const playback = controller.playCompletionSound(0.5)
+  let settled = false
+  void playback.then(() => { settled = true })
+
+  await Promise.resolve()
+  expect(chime.addEventListener).toHaveBeenCalledWith('ended', expect.any(Function), { once: true })
+  expect(settled).toBe(false)
+  complete()
+  await expect(playback).resolves.toBe('playing')
+
+  expect(createAudio).toHaveBeenCalledWith('/sounds/ding.mp3')
+  expect(chime.loop).toBe(false)
+  expect(chime.volume).toBe(0.5)
+  expect(chime.play).toHaveBeenCalledOnce()
+})
+
 test('creates a looping local audio element for the selected sound', async () => {
   const audio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
   const createAudio = vi.fn(() => audio as unknown as HTMLAudioElement)

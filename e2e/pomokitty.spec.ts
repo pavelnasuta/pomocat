@@ -200,7 +200,7 @@ test('honors manual and automatic expiry transitions', async ({ page }) => {
   await expect(page.locator('.timer-screen__status output')).toHaveText('05:00')
 })
 
-test('restores selected audio and focus wake lock across automatic transitions', async ({ page }) => {
+test('plays a completion chime before restoring selected audio and focus wake lock across automatic transitions', async ({ page }) => {
   await page.addInitScript(() => {
     let now = 1_000_000
     const resources = { plays: 0, wakeRequests: 0, wakeReleases: 0 }
@@ -247,11 +247,11 @@ test('restores selected audio and focus wake lock across automatic transitions',
   await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 1, wakeRequests: 1, wakeReleases: 0 })
   await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(60_000))
   await expect(page.getByTestId('mascot')).toHaveAttribute('data-pose', 'stretch')
-  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 2, wakeRequests: 1, wakeReleases: 1 })
+  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 3, wakeRequests: 1, wakeReleases: 1 })
 
   await page.evaluate(() => (window as unknown as PomokittyTestWindow).advancePomokittyClock(60_000))
   await expect(page.getByTestId('mascot')).toHaveAttribute('data-pose', 'work')
-  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 3, wakeRequests: 2, wakeReleases: 1 })
+  await expect.poll(() => page.evaluate(() => (window as unknown as PomokittyTestWindow).pomokittyResources)).toEqual({ plays: 5, wakeRequests: 2, wakeReleases: 1 })
 })
 
 test('requests notification permission only from settings and sends one completion notification', async ({ page }) => {

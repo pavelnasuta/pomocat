@@ -15,7 +15,7 @@ import type { ActiveSession, AppData, Locale, PomodoroSettings } from '../../dom
 import { dictionaries } from '../../i18n/dictionaries'
 
 type AudioPort = Pick<AudioController, 'start' | 'stop'> &
-  Partial<Pick<AudioController, 'select' | 'setVolume'>>
+  Partial<Pick<AudioController, 'select' | 'setVolume' | 'playCompletionSound'>>
 type WakeLockPort = Pick<WakeLockController, 'acquire' | 'release'>
 type NotificationPort = Pick<NotificationController, 'notify'>
 
@@ -235,12 +235,12 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     if (isRunning(nextSession)) await queueResourceTransition(() => activateResources(nextSession, operation, appData.settings))
   }
 
-  async function finishCurrentPhase(autoStartNext = true, activateAutomaticallyStartedPhase = false) {
+  async function finishCurrentPhase(autoStartNext = true, naturallyCompleted = false) {
     if (!isRunning(session) || completionInFlight.current) return
     completionInFlight.current = true
     try {
       invalidateActivation()
-      const nextActivation = activateAutomaticallyStartedPhase && autoStartNext
+      const nextActivation = naturallyCompleted && autoStartNext
         ? activationOperation.current + 1
         : undefined
       if (nextActivation !== undefined) activationOperation.current = nextActivation
@@ -261,6 +261,10 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
       }
       await queueResourceTransition(async () => {
         await releaseResources()
+        if (naturallyCompleted) {
+          const playback = await audio.playCompletionSound?.(appData.settings.soundVolume)
+          if (playback === 'blocked' && mounted.current) setAudioStatus('blocked')
+        }
         if (nextActivation !== undefined && isRunning(nextSession)) {
           await activateResources(nextSession, nextActivation, appData.settings)
         }

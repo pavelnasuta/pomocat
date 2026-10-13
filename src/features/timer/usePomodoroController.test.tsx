@@ -224,7 +224,11 @@ test('persists the next phase and releases resources when the current phase fini
 test('waits for an explicit resume after an elapsed phase when automatic transitions are disabled', async () => {
   vi.useFakeTimers()
   let now = 0
-  const audio = { start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
+  const audio = {
+    start: vi.fn().mockResolvedValue('playing'),
+    stop: vi.fn(),
+    playCompletionSound: vi.fn().mockResolvedValue('playing'),
+  }
   const wakeLock = {
     acquire: vi.fn().mockResolvedValue('active'),
     reacquireWhenVisible: vi.fn().mockResolvedValue('active'),
@@ -252,6 +256,7 @@ test('waits for an explicit resume after an elapsed phase when automatic transit
     pausedPhase: 'shortBreak',
   })
   expect(wakeLock.release).toHaveBeenCalledTimes(1)
+  expect(audio.playCompletionSound).toHaveBeenCalledWith(0.5)
   vi.useRealTimers()
 })
 
