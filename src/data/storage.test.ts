@@ -20,7 +20,7 @@ test('saves data that can be loaded again', () => {
       animationsEnabled: true,
       notificationsEnabled: false,
       keepScreenAwake: false,
-      selectedSound: 'rain' as const,
+      selectedSound: 'forestRain' as const,
       soundEnabled: true,
       soundVolume: 0.5,
     },
@@ -32,7 +32,7 @@ test('saves data that can be loaded again', () => {
   expect(loadAppData(localStorage)).toEqual(data)
 })
 
-test('normalizes no-longer-offered sound choices to rain', () => {
+test('normalizes retired sound choices to the forest-rain default', () => {
   localStorage.setItem(
     'pomokitty:data:v1',
     JSON.stringify({
@@ -46,7 +46,7 @@ test('normalizes no-longer-offered sound choices to rain', () => {
     }),
   )
 
-  expect(loadAppData(localStorage).settings.selectedSound).toBe('rain')
+  expect(loadAppData(localStorage).settings.selectedSound).toBe('forestRain')
 })
 
 test('clears saved data', () => {

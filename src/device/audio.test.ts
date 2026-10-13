@@ -19,9 +19,9 @@ test('creates a looping local audio element for the selected sound', async () =>
   const createAudio = vi.fn(() => audio as unknown as HTMLAudioElement)
   const controller = new AudioController(createAudio)
 
-  await controller.select('whiteNoise')
+  await controller.select('forestRain')
 
-  expect(createAudio).toHaveBeenCalledWith('/sounds/white-noise.mp3')
+  expect(createAudio).toHaveBeenCalledWith('/sounds/forest-rain.mp3')
   expect(audio.loop).toBe(true)
 })
 
@@ -35,9 +35,9 @@ test('resolves selected audio within the Vite Pages base path', async () => {
     const createAudio = vi.fn(() => audio as unknown as HTMLAudioElement)
     const controller = new PagesAudioController(createAudio)
 
-    await controller.select('rain')
+    await controller.select('forestRain')
 
-    expect(createAudio).toHaveBeenCalledWith('/pomokitty/sounds/rain.mp3')
+    expect(createAudio).toHaveBeenCalledWith('/pomokitty/sounds/forest-rain.mp3')
   } finally {
     vi.unstubAllEnvs()
     vi.resetModules()
@@ -48,7 +48,7 @@ test('clamps the selected audio volume to the browser range', async () => {
   const audio = { loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
   const controller = new AudioController(() => audio as unknown as HTMLAudioElement)
 
-  await controller.select('rain')
+  await controller.select('forestRain')
   controller.setVolume(3)
 
   expect(audio.volume).toBe(1)
@@ -58,7 +58,7 @@ test('normalizes NaN before assigning browser audio volume', async () => {
   const audio = document.createElement('audio')
   const controller = new AudioController(() => audio)
 
-  await controller.select('rain')
+  await controller.select('forestRain')
 
   expect(() => controller.setVolume(Number.NaN)).not.toThrow()
   expect(audio.volume).toBe(0)
@@ -84,7 +84,7 @@ test('stops and resets the selected audio at the end of a phase', async () => {
   const audio = { currentTime: 48, loop: false, volume: 0, pause: vi.fn(), play: vi.fn() }
   const controller = new AudioController(() => audio as unknown as HTMLAudioElement)
 
-  await controller.select('rain')
+  await controller.select('forestRain')
   controller.stop()
 
   expect(audio.pause).toHaveBeenCalledOnce()
@@ -100,8 +100,8 @@ test('stops and replaces audio when the selected sound changes', async () => {
     .mockReturnValueOnce(replacementAudio as unknown as HTMLAudioElement)
   const controller = new AudioController(createAudio)
 
-  await controller.select('rain')
-  await controller.select('whiteNoise')
+  await controller.select('forestRain')
+  await controller.select('brownNoise')
 
   expect(previousAudio.pause).toHaveBeenCalledOnce()
   expect(previousAudio.currentTime).toBe(0)
@@ -117,9 +117,9 @@ test('uses the browser Audio constructor by default', async () => {
 
   try {
     const controller = new AudioController()
-    await controller.select('rain')
+    await controller.select('forestRain')
 
-    expect(browserAudio).toHaveBeenCalledWith('/sounds/rain.mp3')
+    expect(browserAudio).toHaveBeenCalledWith('/sounds/forest-rain.mp3')
   } finally {
     vi.unstubAllGlobals()
   }

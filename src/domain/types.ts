@@ -1,10 +1,13 @@
 export type Locale = 'ru' | 'en'
 
 export type SoundId =
+  | 'brownNoise'
+  | 'forestRain'
+  | 'nightForest'
+  | 'ocean'
   | 'rain'
   | 'forest'
   | 'fireplace'
-  | 'ocean'
   | 'whiteNoise'
   | 'none'
 

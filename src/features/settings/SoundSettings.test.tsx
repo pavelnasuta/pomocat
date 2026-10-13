@@ -1,3 +1,4 @@
+import type { SoundId } from '../../domain/types'
 import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { vi } from 'vitest'
@@ -11,23 +12,25 @@ test('renders a visible localized volume label and native range input', () => {
   expect(screen.getByLabelText('Громкость: 50%')).toHaveAttribute('max', '100')
 })
 
-test('offers only rain and white noise because the timer control handles muting', async () => {
+test('offers the approved background recordings in the timer sound menu', async () => {
   const onSelect = vi.fn()
   const onVolumeChange = vi.fn()
   const user = userEvent.setup()
   render(
-    <SoundSettings selectedSound="rain" volume={0.5} onSelect={onSelect} onVolumeChange={onVolumeChange} />,
+    <SoundSettings selectedSound={'forestRain' as SoundId} volume={0.5} onSelect={onSelect} onVolumeChange={onVolumeChange} />,
   )
 
-  expect(screen.getByLabelText('Фоновый звук')).toHaveValue('rain')
+  expect(screen.getByLabelText('Фоновый звук')).toHaveValue('forestRain')
   expect(Array.from(screen.getByLabelText('Фоновый звук').querySelectorAll('option')).map((option) => option.value)).toEqual([
-    'rain',
-    'whiteNoise',
+    'brownNoise',
+    'forestRain',
+    'ocean',
+    'nightForest',
   ])
-  await user.selectOptions(screen.getByLabelText('Фоновый звук'), 'whiteNoise')
+  await user.selectOptions(screen.getByLabelText('Фоновый звук'), 'ocean')
   fireEvent.change(screen.getByLabelText('Громкость: 50%'), { target: { value: '52' } })
 
-  expect(onSelect).toHaveBeenCalledWith('whiteNoise')
+  expect(onSelect).toHaveBeenCalledWith('ocean')
   expect(onVolumeChange).toHaveBeenLastCalledWith(0.52)
 })
 

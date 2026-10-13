@@ -43,7 +43,7 @@ test('keeps settings readable in a dedicated scrollable content area at mobile s
         childName: 'Маша', locale: 'ru', focusMinutes: 25, shortBreakMinutes: 5,
         longBreakMinutes: 15, roundsBeforeLongBreak: 4, autoStartNext: false,
         animationsEnabled: true, notificationsEnabled: false, keepScreenAwake: false,
-        selectedSound: 'rain', soundVolume: 0.5,
+        selectedSound: 'forestRain', soundVolume: 0.5,
       },
       history: [],
     }))
@@ -79,7 +79,7 @@ test('production Pages app and local audio remain available offline after servic
     await context.setOffline(true)
     await page.reload()
     await expect(page.getByRole('heading', { name: 'Как тебя зовут?' })).toBeVisible()
-    await expect.poll(() => page.evaluate(async () => (await fetch('/pomokitty/sounds/rain.mp3')).ok)).toBe(true)
+    await expect.poll(() => page.evaluate(async () => (await fetch('/pomokitty/sounds/forest-rain.mp3')).ok)).toBe(true)
   } finally {
     await context.close()
     preview.kill('SIGTERM')

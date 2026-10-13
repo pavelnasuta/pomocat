@@ -467,7 +467,7 @@ test('releases active focus resources when the controller unmounts', async () =>
 test('mutes and restores the selected background sound from the timer control', async () => {
   const audio = { select: vi.fn().mockResolvedValue(undefined), setVolume: vi.fn(), start: vi.fn().mockResolvedValue('playing'), stop: vi.fn() }
   const data = loadAppData(localStorage)
-  data.settings.selectedSound = 'whiteNoise'
+  data.settings.selectedSound = 'ocean'
   saveAppData(localStorage, data)
   const { result } = renderHook(() => usePomodoroController({ audio }))
 
@@ -477,7 +477,7 @@ test('mutes and restores the selected background sound from the timer control', 
     await Promise.resolve()
   })
 
-  expect(loadAppData(localStorage).settings).toMatchObject({ selectedSound: 'whiteNoise', soundEnabled: false })
+  expect(loadAppData(localStorage).settings).toMatchObject({ selectedSound: 'ocean', soundEnabled: false })
   expect(audio.stop).toHaveBeenCalled()
 
   await act(async () => {
@@ -486,7 +486,7 @@ test('mutes and restores the selected background sound from the timer control', 
   })
 
   expect(loadAppData(localStorage).settings.soundEnabled).toBe(true)
-  expect(audio.select).toHaveBeenLastCalledWith('whiteNoise')
+  expect(audio.select).toHaveBeenLastCalledWith('ocean')
 })
 
 test('reconciles running audio and wake lock when settings change', async () => {

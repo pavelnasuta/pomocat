@@ -1,8 +1,10 @@
 import type { SoundId } from '../domain/types'
 
 const soundFiles: Partial<Record<Exclude<SoundId, 'none'>, string>> = {
-  rain: 'rain.mp3',
-  whiteNoise: 'white-noise.mp3',
+  brownNoise: 'brown-noise.mp3',
+  forestRain: 'forest-rain.mp3',
+  ocean: 'ocean.mp3',
+  nightForest: 'night-forest.mp3',
 }
 
 export class AudioController {

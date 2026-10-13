@@ -1,14 +1,17 @@
 # Local sound asset provenance and licensing
 
-All files below are original, procedural audio generated locally for Pomokitty with
-FFmpeg 9.0.1's built-in `lavfi` sources. No third-party recordings, samples, or
-source files were used. Pomokitty contributors dedicate these generated assets to
-the public domain under [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/).
+The files in this directory are the approved Pomokitty background-sound candidates,
+downloaded on 2026-10-12 from the sources listed below. They are included as local
+assets for offline playback.
 
-| File | Creation method / source | License | Creator credit | Retrieval date |
+| File | Source / item | License | Creator credit | Retrieval date |
 | --- | --- | --- | --- | --- |
-| `rain.mp3` | FFmpeg `anoisesrc` (pink noise), filtered and encoded as MP3. Exact command: `ffmpeg -f lavfi -i "anoisesrc=color=pink:sample_rate=44100:amplitude=0.20" -t 8 -af "lowpass=f=8000,volume=0.55" -c:a libmp3lame -b:a 96k rain.mp3` | CC0 1.0 Universal | Pomokitty contributors | 2026-10-11 |
-| `white-noise.mp3` | FFmpeg `anoisesrc` (white noise), volume adjusted and encoded as MP3. Exact command: `ffmpeg -f lavfi -i "anoisesrc=color=white:sample_rate=44100:amplitude=0.18" -t 8 -af "volume=0.42" -c:a libmp3lame -b:a 96k white-noise.mp3` | CC0 1.0 Universal | Pomokitty contributors | 2026-10-11 |
+| `brown-noise.mp3` | [FreeSoundsLibrary — Brown Noise Sound](https://www.freesoundslibrary.com/brown-noise-sound/) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | Spanac / FreeSoundsLibrary | 2026-10-12 |
+| `forest-rain.mp3` | [Mixkit — Forest rain loop](https://mixkit.co/free-sound-effects/rain/) | [Mixkit License](https://mixkit.co/license/#sfxFree) | Mixkit contributor | 2026-10-12 |
+| `ocean.mp3` | [Mixkit — Sea waves loop](https://mixkit.co/free-sound-effects/ocean) | [Mixkit License](https://mixkit.co/license/#sfxFree) | Mixkit contributor | 2026-10-12 |
+| `night-forest.mp3` | [Mixkit — Night forest with insects](https://mixkit.co/free-sound-effects/night/) | [Mixkit License](https://mixkit.co/license/#sfxFree) | Mixkit contributor | 2026-10-12 |
 
-The `Retrieval date` column records the local asset-creation date because these assets
-were not retrieved from an external source.
+`night-forest.mp3` was re-encoded from the approved Mixkit candidate at 128 kbps
+for reliable offline PWA precaching; its duration remains 1:24. `brown-noise.mp3`
+requires the CC BY 4.0 attribution above wherever Pomokitty publishes third-party
+notices. The distant-thunder candidate was not included.
