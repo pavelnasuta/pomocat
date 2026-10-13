@@ -102,6 +102,7 @@ function isHistoryItem(value: unknown): value is SessionHistoryItem {
     isValidDate(value.completedAt) &&
     (value.actualDurationMs === undefined || isFiniteNumberInRange(value.actualDurationMs, 0, 180 * 60 * 1_000)) &&
     (value.plannedDurationMs === undefined || isFiniteNumberInRange(value.plannedDurationMs, 1, 180 * 60 * 1_000)) &&
+    (value.earnedCats === undefined || isNonnegativeInteger(value.earnedCats, 10_000)) &&
     (value.taskName === undefined || typeof value.taskName === 'string')
   )
 }
@@ -112,7 +113,8 @@ function isAppData(value: unknown): value is Omit<AppData, 'activeSession'> & { 
     value.version === 1 &&
     isSettings(value.settings) &&
     Array.isArray(value.history) &&
-    value.history.every(isHistoryItem)
+    value.history.every(isHistoryItem) &&
+    (value.catProgressMs === undefined || isFiniteNumberInRange(value.catProgressMs, 0, 180 * 60 * 1_000))
   )
 }
 
@@ -142,6 +144,7 @@ function defaultAppData(): AppData {
     version: 1,
     settings: defaultSettings(),
     history: [],
+    catProgressMs: 0,
   }
 }
 
@@ -160,6 +163,7 @@ export function loadAppData(storage: Storage): AppData {
         selectedSound: offeredSoundIds.includes(safeData.settings.selectedSound) ? safeData.settings.selectedSound : 'forestRain',
         soundEnabled: safeData.settings.soundEnabled !== false,
       },
+      catProgressMs: safeData.catProgressMs ?? 0,
     }
     return isActiveSession(activeSession) ? { ...normalizedData, activeSession } : normalizedData
   } catch {

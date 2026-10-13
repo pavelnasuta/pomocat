@@ -110,24 +110,39 @@ test('timer resumes from the persisted deadline after pause and reload, then res
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
     const status = timerScreen.querySelector('.timer-screen__status')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
-    if (!status || !primaryAction) throw new Error('Timer controls are missing')
+    const secondaryActions = timerScreen.querySelector('.timer-screen__secondary-actions')
+    const skip = timerScreen.querySelector('.timer-screen__skip')
+    const reset = timerScreen.querySelector('.timer-screen__reset')
+    if (!status || !primaryAction || !secondaryActions || !skip || !reset) throw new Error('Timer controls are missing')
     const statusBox = status.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
+    const secondaryBox = secondaryActions.getBoundingClientRect()
+    const skipBox = skip.getBoundingClientRect()
+    const resetBox = reset.getBoundingClientRect()
     return {
       pageScrollable: document.documentElement.scrollHeight > window.innerHeight,
       timerScrollable: timerScreen.scrollHeight > timerScreen.clientHeight,
       statusBottom: statusBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
+      primaryWidth: primaryBox.width,
+      secondaryTop: secondaryBox.top,
+      secondaryBottom: secondaryBox.bottom,
+      secondaryWidth: secondaryBox.width,
+      skipTop: skipBox.top,
+      resetTop: resetBox.top,
       viewportHeight: window.innerHeight,
     }
   })
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
   expect(geometry.primaryTop).toBeGreaterThan(geometry.statusBottom)
-  expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
+  expect(geometry.secondaryTop).toBeGreaterThanOrEqual(geometry.primaryBottom)
+  expect(geometry.secondaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
+  expect(geometry.primaryWidth).toBe(geometry.secondaryWidth)
+  expect(geometry.skipTop).toBe(geometry.resetTop)
 
-  await page.getByRole('button', { name: 'Я сделал!' }).click()
+  await page.getByRole('button', { name: 'Я всё сделал' }).click()
   await expect(page.getByRole('button', { name: 'Начать' })).toBeVisible()
   await expect(page.getByLabel('Что делаем?')).toHaveCount(0)
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('pomokitty:data:v1') ?? '{}').activeSession)).toBeUndefined()

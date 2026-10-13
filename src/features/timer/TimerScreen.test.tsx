@@ -26,6 +26,7 @@ function controllerFor(
     start: vi.fn(),
     pause: vi.fn(),
     resume: vi.fn(),
+    skip: vi.fn(),
     finishCurrentPhase: vi.fn(),
     reset: vi.fn(),
   }
@@ -90,15 +91,21 @@ test('renders English paused controls without a task field', async () => {
   expect(controller.resume).toHaveBeenCalledOnce()
 })
 
-test('resets the whole cycle from the localized completion control', async () => {
+test('places skip and localized completion controls side by side below the primary control', async () => {
   const controller = controllerFor('focus', 'en')
   const user = userEvent.setup()
 
   render(<TimerScreen controller={controller} />)
-  const completion = screen.getByRole('button', { name: "I'm done!" })
+  const skip = screen.getByRole('button', { name: 'Skip' })
+  const completion = screen.getByRole('button', { name: "I'm all done" })
   expect(completion.querySelector('.lucide-check')).toBeInTheDocument()
+  expect(skip.querySelector('.lucide-skip-forward')).toBeInTheDocument()
+  expect(skip.parentElement).toHaveClass('timer-screen__secondary-actions')
+  expect(completion.parentElement).toBe(skip.parentElement)
+  await user.click(skip)
   await user.click(completion)
 
+  expect(controller.skip).toHaveBeenCalledOnce()
   expect(controller.reset).toHaveBeenCalledOnce()
   expect(controller.finishCurrentPhase).not.toHaveBeenCalled()
 })

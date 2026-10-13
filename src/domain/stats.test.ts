@@ -1,4 +1,4 @@
-import { getDailyMinutes, getWeeklyMinutes } from './stats'
+import { getAllSessionCount, getDailyMinutes, getWeeklyMinutes } from './stats'
 import type { SessionHistoryItem } from './types'
 
 const history: SessionHistoryItem[] = [
@@ -81,4 +81,20 @@ test('uses actual elapsed focus duration when it is available', () => {
   ]
 
   expect(getDailyMinutes(earlyFinish, new Date('2026-10-11T12:00:00.000Z'))).toBe(5)
+})
+
+test('counts only awarded cats while retaining all accumulated focus minutes', () => {
+  const partialFocus: SessionHistoryItem[] = [
+    {
+      id: 'partial', phase: 'focus', durationMinutes: 10, actualDurationMs: 10 * 60 * 1_000,
+      plannedDurationMs: 25 * 60 * 1_000, earnedCats: 0, completedAt: '2026-10-11T09:00:00.000Z',
+    },
+    {
+      id: 'threshold', phase: 'focus', durationMinutes: 15, actualDurationMs: 15 * 60 * 1_000,
+      plannedDurationMs: 25 * 60 * 1_000, earnedCats: 1, completedAt: '2026-10-11T10:00:00.000Z',
+    },
+  ]
+
+  expect(getDailyMinutes(partialFocus, new Date('2026-10-11T12:00:00.000Z'))).toBe(25)
+  expect(getAllSessionCount(partialFocus)).toBe(1)
 })

@@ -39,12 +39,16 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {
     const status = timerScreen.querySelector('.timer-screen__status')
     const primaryAction = timerScreen.querySelector('.timer-screen__primary')
+    const secondaryActions = timerScreen.querySelector('.timer-screen__secondary-actions')
+    const skip = timerScreen.querySelector('.timer-screen__skip')
     const reset = timerScreen.querySelector('.timer-screen__reset')
     const navigation = document.querySelector('.bottom-nav')
-    if (!status || !primaryAction || !reset || !navigation) throw new Error('Timer controls are missing')
+    if (!status || !primaryAction || !secondaryActions || !skip || !reset || !navigation) throw new Error('Timer controls are missing')
 
     const statusBox = status.getBoundingClientRect()
     const primaryBox = primaryAction.getBoundingClientRect()
+    const secondaryBox = secondaryActions.getBoundingClientRect()
+    const skipBox = skip.getBoundingClientRect()
     const resetBox = reset.getBoundingClientRect()
     const navigationBox = navigation.getBoundingClientRect()
     return {
@@ -53,8 +57,12 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
       statusBottom: statusBox.bottom,
       primaryTop: primaryBox.top,
       primaryBottom: primaryBox.bottom,
+      primaryWidth: primaryBox.width,
+      secondaryTop: secondaryBox.top,
+      secondaryBottom: secondaryBox.bottom,
+      secondaryWidth: secondaryBox.width,
+      skipTop: skipBox.top,
       resetTop: resetBox.top,
-      resetBottom: resetBox.bottom,
       navigationTop: navigationBox.top,
       viewportHeight: window.innerHeight,
     }
@@ -63,8 +71,10 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
   expect(geometry.pageScrollable).toBe(false)
   expect(geometry.timerScrollable).toBe(false)
   expect(geometry.primaryTop).toBeGreaterThan(geometry.statusBottom)
-  expect(geometry.resetBottom).toBeLessThanOrEqual(geometry.primaryTop)
-  expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.navigationTop)
-  expect(geometry.primaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
+  expect(geometry.secondaryTop).toBeGreaterThanOrEqual(geometry.primaryBottom)
+  expect(geometry.secondaryBottom).toBeLessThanOrEqual(geometry.navigationTop)
+  expect(geometry.secondaryBottom).toBeLessThanOrEqual(geometry.viewportHeight)
+  expect(geometry.primaryWidth).toBe(geometry.secondaryWidth)
+  expect(geometry.skipTop).toBe(geometry.resetTop)
 })
 }

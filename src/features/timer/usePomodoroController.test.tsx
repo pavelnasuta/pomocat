@@ -221,6 +221,52 @@ test('persists the next phase and releases resources when the current phase fini
   expect(wakeLock.release).toHaveBeenCalledTimes(1)
 })
 
+test('banks skipped focus time and awards a cat after one full focus duration', async () => {
+  let now = 10 * 60 * 1_000
+  const data = loadAppData(localStorage)
+  data.activeSession = startSession(0, data.settings)
+  saveAppData(localStorage, data)
+  const { result } = renderHook(() => usePomodoroController({ now: () => now }))
+
+  await act(async () => {
+    await result.current.skip()
+  })
+  await act(async () => {
+    await result.current.skip()
+  })
+  now += 15 * 60 * 1_000
+  await act(async () => {
+    await result.current.skip()
+  })
+
+  expect(loadAppData(localStorage)).toMatchObject({
+    catProgressMs: 0,
+    history: [
+      { phase: 'focus', actualDurationMs: 10 * 60 * 1_000, earnedCats: 0 },
+      { phase: 'focus', actualDurationMs: 15 * 60 * 1_000, earnedCats: 1 },
+    ],
+  })
+})
+
+test('uses a fixed 25-minute threshold after the child changes focus duration', async () => {
+  let now = 5 * 60 * 1_000
+  const data = loadAppData(localStorage)
+  data.settings.focusMinutes = 15
+  data.catProgressMs = 10 * 60 * 1_000
+  data.activeSession = startSession(0, data.settings)
+  saveAppData(localStorage, data)
+  const { result } = renderHook(() => usePomodoroController({ now: () => now }))
+
+  await act(async () => {
+    await result.current.skip()
+  })
+
+  expect(loadAppData(localStorage)).toMatchObject({
+    catProgressMs: 15 * 60 * 1_000,
+    history: [{ phase: 'focus', actualDurationMs: 5 * 60 * 1_000, earnedCats: 0 }],
+  })
+})
+
 test('waits for an explicit resume after an elapsed phase when automatic transitions are disabled', async () => {
   vi.useFakeTimers()
   let now = 0

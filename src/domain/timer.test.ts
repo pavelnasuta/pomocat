@@ -92,6 +92,19 @@ test('starts a configured short break after an ordinary focus completion', () =>
   expect(transition.nextSession.totalMs).toBe(5 * 60 * 1_000)
 })
 
+test('records elapsed focus time without advancing the completed-round count when focus is skipped', () => {
+  const session = { ...startSession(0, settings), completedFocusRounds: 3 }
+
+  const transition = completeCurrentPhase(session, settings, 10 * 60 * 1_000, false)
+
+  expect(transition.nextPhase).toBe('shortBreak')
+  expect(transition.nextSession.completedFocusRounds).toBe(3)
+  expect(transition.historyItem).toMatchObject({
+    actualDurationMs: 10 * 60 * 1_000,
+    plannedDurationMs: 25 * 60 * 1_000,
+  })
+})
+
 test('derives a non-paused legacy session without an absolute deadline', () => {
   const legacySession: ActiveSession = {
     phase: 'focus',

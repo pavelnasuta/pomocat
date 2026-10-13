@@ -112,11 +112,12 @@ export function completeCurrentPhase(
   session: ActiveSession,
   settings: PomodoroSettings,
   now: number,
+  countFocusRound = true,
 ): PhaseTransition {
   const completedFocusRounds = session.completedFocusRounds ?? session.completedRounds
 
   if (session.phase === 'focus') {
-    const nextCompletedFocusRounds = completedFocusRounds + 1
+    const nextCompletedFocusRounds = completedFocusRounds + (countFocusRound ? 1 : 0)
     const nextPhase =
       nextCompletedFocusRounds % settings.roundsBeforeLongBreak === 0 ? 'longBreak' : 'shortBreak'
 

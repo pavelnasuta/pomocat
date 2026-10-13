@@ -32,6 +32,7 @@ export interface PomodoroController {
   start(): Promise<void>
   pause(): Promise<void>
   resume(): Promise<void>
+  skip(): Promise<void>
   finishCurrentPhase(autoStartNext?: boolean): Promise<void>
   reset(): Promise<void>
 }
@@ -47,6 +48,8 @@ interface PomodoroControllerOptions {
   onAppDataChange?(data: AppData): void
   onPersistenceChange?(unsaved: boolean): void
 }
+
+const CAT_AWARD_THRESHOLD_MS = 25 * 60 * 1_000
 
 function idleView(): TimerView {
   return {
@@ -119,8 +122,12 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     }
   }, [audio, wakeLock])
 
-  function persist(nextSession: ActiveSession | undefined, history = appData.history) {
-    const nextAppData = { ...appData, activeSession: nextSession, history }
+  function persist(
+    nextSession: ActiveSession | undefined,
+    history = appData.history,
+    catProgressMs = appData.catProgressMs ?? 0,
+  ) {
+    const nextAppData = { ...appData, activeSession: nextSession, history, catProgressMs }
     const saved = saveAppData(storage, nextAppData)
     options.onPersistenceChange?.(!saved)
     setAppData(nextAppData)
@@ -235,23 +242,35 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     if (isRunning(nextSession)) await queueResourceTransition(() => activateResources(nextSession, operation, appData.settings))
   }
 
-  async function finishCurrentPhase(autoStartNext = true, naturallyCompleted = false) {
+  async function finishCurrentPhase(
+    autoStartNext = true,
+    naturallyCompleted = false,
+    activateNext = naturallyCompleted,
+    countFocusRound = true,
+  ) {
     if (!isRunning(session) || completionInFlight.current) return
     completionInFlight.current = true
     try {
       invalidateActivation()
-      const nextActivation = naturallyCompleted && autoStartNext
+      const nextActivation = activateNext && autoStartNext
         ? activationOperation.current + 1
         : undefined
       if (nextActivation !== undefined) activationOperation.current = nextActivation
-      const transition = completeCurrentPhase(session, appData.settings, now())
+      const transition = completeCurrentPhase(session, appData.settings, now(), countFocusRound)
       const nextSession = autoStartNext
         ? transition.nextSession
         : pauseSession(transition.nextSession, now())
-      persist(
-        nextSession,
-        transition.historyItem ? [...appData.history, transition.historyItem] : appData.history,
-      )
+      let catProgressMs = appData.catProgressMs ?? 0
+      const history = transition.historyItem
+        ? (() => {
+            const actualDurationMs = transition.historyItem.actualDurationMs ?? transition.historyItem.durationMinutes * 60 * 1_000
+            const totalFocusMs = catProgressMs + actualDurationMs
+            const earnedCats = Math.floor(totalFocusMs / CAT_AWARD_THRESHOLD_MS)
+            catProgressMs = totalFocusMs - earnedCats * CAT_AWARD_THRESHOLD_MS
+            return [...appData.history, { ...transition.historyItem, earnedCats }]
+          })()
+        : appData.history
+      persist(nextSession, history, catProgressMs)
       if (appData.settings.notificationsEnabled) {
         const messages = dictionaries[appData.settings.locale]
         notifications.notify(
@@ -272,6 +291,10 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     } finally {
       completionInFlight.current = false
     }
+  }
+
+  async function skip() {
+    await finishCurrentPhase(true, false, true, false)
   }
 
   async function reset() {
@@ -313,6 +336,7 @@ export function usePomodoroController(options: PomodoroControllerOptions = {}): 
     start,
     pause,
     resume,
+    skip,
     finishCurrentPhase,
     reset,
   }

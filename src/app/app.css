@@ -252,7 +252,21 @@ input:focus-visible {
   font-size: 0.875rem;
 }
 
+.timer-screen__controls {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+}
+
+.timer-screen__secondary-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
 .timer-screen__reset,
+.timer-screen__skip,
 .timer-screen__primary {
   display: inline-flex;
   align-items: center;
@@ -260,12 +274,20 @@ input:focus-visible {
   gap: 8px;
 }
 
-.timer-screen__reset {
+.timer-screen__reset,
+.timer-screen__skip {
+  min-height: 44px;
+  padding: 8px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   color: var(--color-dark-blue);
   background: var(--color-surface);
   font-weight: 700;
+}
+
+.timer-screen__skip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .timer-screen__button-icon {

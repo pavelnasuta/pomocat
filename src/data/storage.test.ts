@@ -25,6 +25,7 @@ test('saves data that can be loaded again', () => {
       soundVolume: 0.5,
     },
     history: [],
+    catProgressMs: 0,
   }
 
   saveAppData(localStorage, data)

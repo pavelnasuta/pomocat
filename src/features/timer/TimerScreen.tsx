@@ -1,4 +1,4 @@
-import { Check, Pause, Play, Volume2, VolumeX } from 'lucide-react'
+import { Check, Pause, Play, SkipForward, Volume2, VolumeX } from 'lucide-react'
 import { Mascot, type MascotPose } from '../../components/Mascot'
 import { useTranslation } from '../../i18n/useTranslation'
 import type { PomodoroController } from './usePomodoroController'
@@ -75,22 +75,35 @@ export function TimerScreen({ controller }: TimerScreenProps) {
         />
         {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
         {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}
-        {isResettable && (
-          <button type="button" className="timer-screen__reset" onClick={() => void controller.reset()}>
-            <Check aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
-            <span>{t('timer.complete')}</span>
-          </button>
-        )}
       </div>
 
-      <button
-        type="button"
-        className="timer-screen__primary"
-        onClick={() => void (controller.view.phase === 'paused' ? controller.resume() : isActive ? controller.pause() : controller.start())}
-      >
-        <PrimaryIcon aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
-        <span>{controller.view.phase === 'paused' ? t('timer.resume') : isActive ? t('timer.pause') : t('timer.start')}</span>
-      </button>
+      <div className="timer-screen__controls">
+        <button
+          type="button"
+          className="timer-screen__primary"
+          onClick={() => void (controller.view.phase === 'paused' ? controller.resume() : isActive ? controller.pause() : controller.start())}
+        >
+          <PrimaryIcon aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
+          <span>{controller.view.phase === 'paused' ? t('timer.resume') : isActive ? t('timer.pause') : t('timer.start')}</span>
+        </button>
+        {isResettable && (
+          <div className="timer-screen__secondary-actions">
+            <button
+              type="button"
+              className="timer-screen__skip"
+              disabled={!isActive}
+              onClick={() => void controller.skip()}
+            >
+              <SkipForward aria-hidden className="timer-screen__button-icon" size={18} strokeWidth={2} />
+              <span>{t('timer.skip')}</span>
+            </button>
+            <button type="button" className="timer-screen__reset" onClick={() => void controller.reset()}>
+              <Check aria-hidden className="timer-screen__button-icon" size={18} strokeWidth={2} />
+              <span>{t('timer.complete')}</span>
+            </button>
+          </div>
+        )}
+      </div>
     </section>
   )
 }

@@ -51,6 +51,8 @@ export interface SessionHistoryItem {
   actualDurationMs?: number
   /** Original phase duration, useful when a child finishes early. */
   plannedDurationMs?: number
+  /** Cats awarded when this focus entry completed; absent on legacy full sessions. */
+  earnedCats?: number
   taskName?: string
 }
 
@@ -59,4 +61,6 @@ export interface AppData {
   settings: PomodoroSettings
   activeSession?: ActiveSession
   history: SessionHistoryItem[]
+  /** Focus time banked toward the next cat. */
+  catProgressMs?: number
 }

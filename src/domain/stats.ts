@@ -30,14 +30,16 @@ function countCompletedWithin(
   start: Date,
   end: Date,
 ): number {
-  return history.filter((item) => {
+  return history.reduce((count, item) => {
     const completedAt = new Date(item.completedAt)
     return item.phase === 'focus' && completedAt >= start && completedAt < end
-  }).length
+      ? count + (item.earnedCats ?? 1)
+      : count
+  }, 0)
 }
 
 export function getAllSessionCount(history: SessionHistoryItem[]): number {
-  return history.filter((item) => item.phase === 'focus').length
+  return history.reduce((count, item) => item.phase === 'focus' ? count + (item.earnedCats ?? 1) : count, 0)
 }
 
 export function getWeeklySessionCount(history: SessionHistoryItem[], now: Date): number {
