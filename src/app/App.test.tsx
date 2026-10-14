@@ -41,6 +41,10 @@ function deferred<T>() {
   return { promise, resolve }
 }
 
+afterEach(() => {
+  vi.useRealTimers()
+})
+
 beforeEach(() => {
   vi.clearAllMocks()
   deviceMocks.audio.select.mockResolvedValue(undefined)
@@ -137,6 +141,22 @@ test('shows the all-time cat total directly below the child name', () => {
   render(<App />)
 
   expect(screen.getByLabelText('Всего котиков: 3')).toBeInTheDocument()
+})
+
+test('renders the tablet timer companions from the child’s locally stored progress', () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date('2026-10-11T12:00:00.000Z'))
+  const data = loadAppData(localStorage)
+  data.settings.childName = 'Маша'
+  data.history = [{ id: 'today', phase: 'focus', durationMinutes: 25, earnedCats: 1, completedAt: '2026-10-11T10:00:00.000Z' }]
+  saveAppData(localStorage, data)
+
+  render(<App />)
+
+  expect(screen.getByLabelText('Котики и фокус')).toBeInTheDocument()
+  expect(screen.getByLabelText('Ритм на сегодня')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Поделиться котиками' })).toBeInTheDocument()
+  vi.useRealTimers()
 })
 
 test('opens the advice list from navigation', async () => {

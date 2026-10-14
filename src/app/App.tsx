@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Cat } from 'lucide-react'
 import { BottomNav, type NavigationSection } from '../components/BottomNav'
+import { TabletNav } from '../components/TabletNav'
 import { Onboarding, type OnboardingResult } from '../components/Onboarding'
 import { clearAppData, loadAppData, saveAppData } from '../data/storage'
 import { NotificationController } from '../device/notifications'
@@ -9,12 +10,30 @@ import { AdviceArticleScreen } from '../features/advice/AdviceArticleScreen'
 import { AdviceListScreen } from '../features/advice/AdviceListScreen'
 import type { AdviceArticleId } from '../features/advice/articles'
 import { StatsScreen } from '../features/stats/StatsScreen'
+import { TabletStatsPanel } from '../features/stats/TabletStatsPanel'
+import { TabletRoutinePanel } from '../features/timer/TabletRoutinePanel'
 import { TimerScreen } from '../features/timer/TimerScreen'
 import { usePomodoroController } from '../features/timer/usePomodoroController'
 import { getAllSessionCount } from '../domain/stats'
 import { appThemes } from '../theme/themes'
 import type { PomodoroSettings } from '../domain/types'
 import { useTranslation } from '../i18n/useTranslation'
+
+function useTabletLandscape(): boolean {
+  const query = '(min-width: 64rem) and (orientation: landscape)'
+  const [matches, setMatches] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.(query).matches))
+
+  useEffect(() => {
+    if (!window.matchMedia) return undefined
+    const media = window.matchMedia(query)
+    const update = () => setMatches(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [])
+
+  return matches
+}
 
 export function App() {
   const [appData, setAppData] = useState(() => loadAppData(localStorage))
@@ -30,6 +49,7 @@ export function App() {
   const [activeAdviceArticle, setActiveAdviceArticle] = useState<AdviceArticleId>()
   const effectiveLocale = appData.settings.locale
   const theme = appData.settings.theme ?? 'terracotta'
+  const isTabletLandscape = useTabletLandscape()
   const screenKey = activeSection === 'advice' ? `advice-${activeAdviceArticle ?? 'list'}` : activeSection
   const { t } = useTranslation(effectiveLocale)
 
@@ -88,6 +108,7 @@ export function App() {
     <main className="app-shell" aria-label="pomokitty" style={appThemes[theme].variables as CSSProperties}>
       <header className="app-shell__header">
         <span className="app-shell__brand">pomokitty</span>
+        {isTabletLandscape && <TabletNav active={activeSection} locale={effectiveLocale} onChange={setActiveSection} />}
         <div className="app-shell__profile">
           <p className="app-shell__greeting">
             {t('app.greeting')} {appData.settings.childName}
@@ -107,7 +128,19 @@ export function App() {
         <div className="app-shell__screen" data-screen={activeSection} key={screenKey}>
         {activeSection === 'timer' && (
           <section className="app-section app-section--timer" aria-label={t('navigation.timer')}>
-            <TimerScreen controller={timerController} theme={theme} />
+            <TimerScreen
+              controller={timerController}
+              theme={theme}
+              tabletStart={(
+                <TabletStatsPanel
+                  history={appData.history}
+                  locale={effectiveLocale}
+                  childName={appData.settings.childName}
+                  theme={theme}
+                />
+              )}
+              tabletEnd={<TabletRoutinePanel controller={timerController} roundsBeforeLongBreak={appData.settings.roundsBeforeLongBreak} />}
+            />
           </section>
         )}
 

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { AudioWaveform, Check, CloudRain, Pause, Play, SkipForward, Trees, Volume2, VolumeX, Waves } from 'lucide-react'
 import { Mascot, type MascotPose } from '../../components/Mascot'
 import type { SoundId } from '../../domain/types'
@@ -8,6 +9,8 @@ import type { PomodoroController } from './usePomodoroController'
 interface TimerScreenProps {
   controller: PomodoroController
   theme?: ThemeId
+  tabletStart?: ReactNode
+  tabletEnd?: ReactNode
 }
 
 type QuickSoundId = Extract<SoundId, 'brownNoise' | 'forestRain' | 'ocean' | 'nightForest'>
@@ -40,7 +43,7 @@ function mascotPose(controller: PomodoroController): MascotPose {
   return 'rest'
 }
 
-export function TimerScreen({ controller, theme = 'terracotta' }: TimerScreenProps) {
+export function TimerScreen({ controller, theme = 'terracotta', tabletStart, tabletEnd }: TimerScreenProps) {
   const { t } = useTranslation(controller.locale)
   const isActive =
     controller.view.phase === 'focus' ||
@@ -58,86 +61,92 @@ export function TimerScreen({ controller, theme = 'terracotta' }: TimerScreenPro
 
   return (
     <section className="timer-screen" aria-label={t('navigation.timer')}>
-      <header className="timer-screen__status">
-        <p>{phaseLabel}</p>
-        <output aria-live="polite">{formatRemainingTime(controller.view.remainingMs)}</output>
-        <div
-          className="timer-screen__progress"
-          role="progressbar"
-          aria-label={t('timer.progress')}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={progress}
-        >
-          <span style={{ width: `${progress}%` }} />
-        </div>
-        <div className="timer-screen__sound-controls" role="group" aria-label={t('settings.soundChoice')}>
-          <button
-            type="button"
-            className="timer-screen__sound-toggle"
-            aria-label={t(controller.soundEnabled ? 'timer.soundOff' : 'timer.soundOn')}
-            aria-pressed={controller.soundEnabled}
-            onClick={controller.toggleSound}
-          >
-            <SoundIcon aria-hidden size={24} strokeWidth={2} />
-          </button>
-          <span className="timer-screen__sound-divider" aria-hidden />
-          {quickSoundOptions.map(({ id, icon: Icon }) => {
-            const isSelected = controller.soundEnabled && selectedQuickSound === id
-            return (
+      <div className="timer-screen__tablet-layout">
+        {tabletStart && <div className="timer-screen__tablet-sidebar timer-screen__tablet-sidebar--start">{tabletStart}</div>}
+        <div className="timer-screen__core">
+          <header className="timer-screen__status">
+            <p>{phaseLabel}</p>
+            <output aria-live="polite">{formatRemainingTime(controller.view.remainingMs)}</output>
+            <div
+              className="timer-screen__progress"
+              role="progressbar"
+              aria-label={t('timer.progress')}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress}
+            >
+              <span style={{ width: `${progress}%` }} />
+            </div>
+            <div className="timer-screen__sound-controls" role="group" aria-label={t('settings.soundChoice')}>
               <button
-                key={id}
                 type="button"
-                className={`timer-screen__sound-option${isSelected ? ' timer-screen__sound-option--active' : ''}`}
-                aria-label={t(`settings.sound.${id}`)}
-                aria-pressed={isSelected}
-                onClick={() => controller.selectSound(id)}
+                className="timer-screen__sound-toggle"
+                aria-label={t(controller.soundEnabled ? 'timer.soundOff' : 'timer.soundOn')}
+                aria-pressed={controller.soundEnabled}
+                onClick={controller.toggleSound}
               >
-                <Icon aria-hidden size={21} strokeWidth={2} />
+                <SoundIcon aria-hidden size={24} strokeWidth={2} />
               </button>
-            )
-          })}
-        </div>
-      </header>
+              <span className="timer-screen__sound-divider" aria-hidden />
+              {quickSoundOptions.map(({ id, icon: Icon }) => {
+                const isSelected = controller.soundEnabled && selectedQuickSound === id
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`timer-screen__sound-option${isSelected ? ' timer-screen__sound-option--active' : ''}`}
+                    aria-label={t(`settings.sound.${id}`)}
+                    aria-pressed={isSelected}
+                    onClick={() => controller.selectSound(id)}
+                  >
+                    <Icon aria-hidden size={21} strokeWidth={2} />
+                  </button>
+                )
+              })}
+            </div>
+          </header>
 
-      <div className="timer-screen__actions">
-        <Mascot
-          active={controller.view.phase === 'focus'}
-          animationsEnabled={controller.animationsEnabled}
-          locale={controller.locale}
-          pose={mascotPose(controller)}
-          theme={theme}
-        />
-        {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
-        {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}
-      </div>
+          <div className="timer-screen__actions">
+            <Mascot
+              active={controller.view.phase === 'focus'}
+              animationsEnabled={controller.animationsEnabled}
+              locale={controller.locale}
+              pose={mascotPose(controller)}
+              theme={theme}
+            />
+            {controller.wakeLockStatus === 'unavailable' && <p>{t('timer.wakeLockUnavailable')}</p>}
+            {controller.audioStatus === 'blocked' && <p role="status">{t('timer.audioBlocked')}</p>}
+          </div>
 
-      <div className="timer-screen__controls">
-        <button
-          type="button"
-          className="timer-screen__primary"
-          onClick={() => void (controller.view.phase === 'paused' ? controller.resume() : isActive ? controller.pause() : controller.start())}
-        >
-          <PrimaryIcon aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
-          <span>{controller.view.phase === 'paused' ? t('timer.resume') : isActive ? t('timer.pause') : t('timer.start')}</span>
-        </button>
-        {isResettable && (
-          <div className="timer-screen__secondary-actions">
+          <div className="timer-screen__controls">
             <button
               type="button"
-              className="timer-screen__skip"
-              disabled={!isActive}
-              onClick={() => void controller.skip()}
+              className="timer-screen__primary"
+              onClick={() => void (controller.view.phase === 'paused' ? controller.resume() : isActive ? controller.pause() : controller.start())}
             >
-              <SkipForward aria-hidden className="timer-screen__button-icon" size={18} strokeWidth={2} />
-              <span>{t('timer.skip')}</span>
+              <PrimaryIcon aria-hidden className="timer-screen__button-icon" size={20} strokeWidth={2} />
+              <span>{controller.view.phase === 'paused' ? t('timer.resume') : isActive ? t('timer.pause') : t('timer.start')}</span>
             </button>
-            <button type="button" className="timer-screen__reset" onClick={() => void controller.reset()}>
-              <Check aria-hidden className="timer-screen__button-icon" size={18} strokeWidth={2} />
-              <span>{t('timer.complete')}</span>
-            </button>
+            {isResettable && (
+              <div className="timer-screen__secondary-actions">
+                <button
+                  type="button"
+                  className="timer-screen__skip"
+                  disabled={!isActive}
+                  onClick={() => void controller.skip()}
+                >
+                  <SkipForward aria-hidden className="timer-screen__button-icon" size={18} strokeWidth={2} />
+                  <span>{t('timer.skip')}</span>
+                </button>
+                <button type="button" className="timer-screen__reset" onClick={() => void controller.reset()}>
+                  <Check aria-hidden className="timer-screen__button-icon" size={18} strokeWidth={2} />
+                  <span>{t('timer.complete')}</span>
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+        {tabletEnd && <div className="timer-screen__tablet-sidebar timer-screen__tablet-sidebar--end">{tabletEnd}</div>}
       </div>
     </section>
   )

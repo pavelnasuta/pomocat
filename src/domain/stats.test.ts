@@ -1,4 +1,4 @@
-import { getAllSessionCount, getDailyMinutes, getWeeklyMinutes } from './stats'
+import { getAllSessionCount, getDailyMinutes, getDailySessionCount, getMonthlyMinutes, getWeeklyMinutes } from './stats'
 import type { SessionHistoryItem } from './types'
 
 const history: SessionHistoryItem[] = [
@@ -81,6 +81,19 @@ test('uses actual elapsed focus duration when it is available', () => {
   ]
 
   expect(getDailyMinutes(earlyFinish, new Date('2026-10-11T12:00:00.000Z'))).toBe(5)
+})
+
+test('counts daily earned cats and monthly focus minutes for a compact progress summary', () => {
+  const summaryHistory: SessionHistoryItem[] = [
+    ...history,
+    { id: 'today-double', phase: 'focus', durationMinutes: 25, earnedCats: 2, completedAt: '2026-10-11T10:00:00.000Z' },
+    { id: 'month', phase: 'focus', durationMinutes: 30, earnedCats: 1, completedAt: '2026-10-02T10:00:00.000Z' },
+    { id: 'last-month', phase: 'focus', durationMinutes: 40, earnedCats: 2, completedAt: '2026-09-30T10:00:00.000Z' },
+  ]
+  const now = new Date('2026-10-11T12:00:00.000Z')
+
+  expect(getDailySessionCount(summaryHistory, now)).toBe(3)
+  expect(getMonthlyMinutes(summaryHistory, now)).toBe(80)
 })
 
 test('counts only awarded cats while retaining all accumulated focus minutes', () => {

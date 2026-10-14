@@ -51,6 +51,19 @@ export function getWeeklySessionCount(history: SessionHistoryItem[], now: Date):
   return countCompletedWithin(history, start, end)
 }
 
+export function getDailySessionCount(history: SessionHistoryItem[], now: Date): number {
+  const start = startOfDay(now)
+  const end = new Date(start)
+  end.setDate(end.getDate() + 1)
+  return countCompletedWithin(history, start, end)
+}
+
+export function getMonthlyMinutes(history: SessionHistoryItem[], now: Date): number {
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+  return sumCompletedWithin(history, start, end)
+}
+
 export function getMonthlySessionCount(history: SessionHistoryItem[], now: Date): number {
   const start = new Date(now.getFullYear(), now.getMonth(), 1)
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 1)

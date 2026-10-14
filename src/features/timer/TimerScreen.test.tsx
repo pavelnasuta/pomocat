@@ -128,6 +128,20 @@ test('places skip and localized completion controls side by side below the prima
   expect(controller.finishCurrentPhase).not.toHaveBeenCalled()
 })
 
+test('renders supplied tablet side panels while preserving the timer controls', () => {
+  render(
+    <TimerScreen
+      controller={controllerFor()}
+      tabletStart={<aside aria-label="Котики и фокус">Прогресс</aside>}
+      tabletEnd={<aside aria-label="Ритм на сегодня">Звук и ритм</aside>}
+    />,
+  )
+
+  expect(screen.getByLabelText('Котики и фокус')).toBeInTheDocument()
+  expect(screen.getByLabelText('Ритм на сегодня')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Пауза' })).toBeInTheDocument()
+})
+
 test('shows a short localized audio status while keeping timer controls available', () => {
   const controller = controllerFor('focus', 'en')
   controller.audioStatus = 'blocked'
