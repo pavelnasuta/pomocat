@@ -47,15 +47,13 @@
     .quiet-note { max-width: 250px; color: var(--muted); font-size: 13px; font-weight: 650; line-height: 1.4; }
     .hero-art { position: relative; justify-self: center; width: min(100%, 350px); transform: rotate(4deg); }
     .phone { position: relative; overflow: hidden; border: 10px solid #20354e; border-radius: 40px; background: #20354e; box-shadow: 0 32px 55px rgb(35 58 85 / 24%); }
-    .phone::after { position: absolute; width: 38%; height: 23px; border-radius: 0 0 15px 15px; top: 0; left: 31%; background: #20354e; content: ""; }
     .phone img { display: block; width: 100%; }
     .hero-sticker { position: absolute; right: -54px; bottom: 48px; padding: 13px 16px; border: 2px solid var(--line); border-radius: 18px; color: var(--ink); background: var(--surface); box-shadow: 0 13px 25px rgb(35 58 85 / 12%); font-size: 14px; font-weight: 850; transform: rotate(-8deg); }
     .hero-sticker span { color: var(--accent); }
-    .hero-cat { position: absolute; z-index: -1; width: 185px; right: -128px; bottom: -28px; filter: drop-shadow(0 16px 15px rgb(35 58 85 / 14%)); transform: rotate(10deg); }
     .cat-note { position: relative; overflow: hidden; }
     .cat-note img { position: absolute; width: 132px; right: -20px; bottom: -34px; opacity: .38; transform: rotate(-8deg); }
     .cat-note p { position: relative; z-index: 1; }
-    .cat-corner { position: absolute; width: 150px; right: 7%; top: 32px; filter: drop-shadow(0 15px 15px rgb(0 0 0 / 13%)); transform: rotate(11deg); }
+    .cat-corner { position: absolute; width: 150px; right: 12%; top: 32px; filter: drop-shadow(0 15px 15px rgb(0 0 0 / 13%)); transform: rotate(11deg); }
     .closing-cat { position: absolute; width: 180px; z-index: 0; left: max(3%, calc(50% - 575px)); bottom: -52px; opacity: .78; transform: rotate(-9deg); }
 
 
@@ -64,7 +62,7 @@
     .pain-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
     .pain-list li { display: grid; grid-template-columns: 42px 1fr; gap: 13px; padding: 23px 0; border-bottom: 1px solid var(--line); font-size: 20px; font-weight: 750; line-height: 1.22; }
     .pain-list b { color: var(--accent); font-size: 15px; }
-    .parent-note { padding: 31px; border-radius: 26px; background: var(--mint-pale); }
+    .parent-note { margin-top: 28px; padding: 31px; border-radius: 26px; background: var(--mint-pale); }
     .parent-note p { margin: 0; font-size: clamp(24px, 2.5vw, 34px); font-weight: 800; line-height: 1.1; letter-spacing: -.045em; }
     .parent-note p + p { margin-top: 22px; color: color-mix(in srgb, var(--ink), transparent 27%); font-size: 16px; font-weight: 650; line-height: 1.5; letter-spacing: 0; }
 
@@ -135,8 +133,7 @@
       .hero-grid, .pains-grid, .rhythm-head, .showcase-grid, .privacy-grid, .faq-grid { grid-template-columns: 1fr; gap: 36px; }
       .hero-copy { padding-block: 0; }
       .hero-art { margin-top: 4px; width: min(82%, 335px); }
-      .hero-cat { width: 122px; right: -85px; bottom: -14px; }
-      .cat-corner { width: 100px; right: -28px; top: 22px; }
+      .cat-corner { width: 100px; right: 22px; top: 22px; }
       .closing-cat { width: 130px; left: -26px; bottom: -36px; }
       .hero-sticker { right: -34px; bottom: 25px; }
       .pains, .rhythm, .start, .faq { padding: 76px 0; }
@@ -172,7 +169,6 @@
         <div class="hero-art" aria-label="Экран таймера pomokitty">
           <div class="phone"><img src="%BASE_URL%landing/timer-screen.png" alt="Экран таймера pomokitty" /></div>
           <div class="hero-sticker">Фокус — это <span>не гонка</span></div>
-          <img class="hero-cat" src="%BASE_URL%landing/cat-focus.png" alt="" />
         </div>
       </div>
     </section>
@@ -207,6 +203,6 @@
 
     <section class="closing"><img class="closing-cat" src="%BASE_URL%landing/cat-celebrate.png" alt="" /><div class="wrap"><p class="eyebrow" style="color:#ffe7dd">Первый шаг</p><h2 class="h2">Сегодня достаточно одного спокойного фокус-раунда.</h2><p class="lead">Откройте pomokitty вместе с ребёнком — и попробуйте начать с малого.</p><a class="button" href="app/">Открыть pomokitty</a></div></section>
   </main>
-  <footer><div class="wrap footer-inner"><span>pomokitty — спокойный таймер фокуса для детей.</span><a href="app/">pavelnasuta.github.io/pomokitty</a></div></footer>
+  <footer><div class="wrap footer-inner"><span>pomokitty — спокойный таймер фокуса для детей.</span><a href="https://t.me/niimozgii" target="_blank" rel="noreferrer">НИИ МОЗГИ</a><a href="app/">pavelnasuta.github.io/pomokitty</a></div></footer>
 </body>
 </html>

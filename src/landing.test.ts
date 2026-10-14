@@ -17,6 +17,9 @@ test('makes the parent landing the root page and links to the app route', () => 
   expect(landing).toContain('Личное остаётся личным')
   expect(landing).toContain('href="app/"')
   expect(landing).toContain('timer-screen.png')
+  expect(landing).toContain('НИИ МОЗГИ')
+  expect(landing).not.toContain('.phone::after')
+  expect(landing).not.toContain('class="hero-cat"')
 })
 
 test('builds the React PWA at the app route', () => {
