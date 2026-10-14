@@ -46,6 +46,8 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
   expect(manifest).toMatchObject({
     name: 'pomokitty',
     short_name: 'pomokitty',
+    description: 'Спокойный таймер фокуса для детей: одно дело, короткий отдых и котики за внимание.',
+    id: '/pomokitty/app/',
     start_url: '/pomokitty/app/',
     scope: '/pomokitty/app/',
     display: 'standalone',
@@ -64,6 +66,22 @@ test('configures edge-to-edge status bars for the standalone app route', () => {
   expect(index).toContain('name="apple-mobile-web-app-capable" content="yes"')
   expect(index).toContain('name="apple-mobile-web-app-status-bar-style" content="black-translucent"')
   expect(index).toContain('name="theme-color" content="#99432c"')
+})
+
+test('includes browser and Apple home-screen icons for the public site', () => {
+  const landing = readFileSync(`${projectRoot}index.html`, 'utf8')
+  const app = readFileSync(`${projectRoot}app/index.html`, 'utf8')
+
+  for (const document of [landing, app]) {
+    expect(document).toContain('rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml"')
+    expect(document).toContain('rel="icon" href="%BASE_URL%favicon.ico" sizes="any"')
+    expect(document).toContain('rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png"')
+    expect(document).toContain('name="twitter:card" content="summary_large_image"')
+  }
+
+  for (const asset of ['favicon.svg', 'favicon.ico', 'social-preview.png', 'icons/apple-touch-icon.png']) {
+    expect(existsSync(`${projectRoot}public/${asset}`)).toBe(true)
+  }
 })
 
 test('precaches only the approved background audio in the service worker', () => {

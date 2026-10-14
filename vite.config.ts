@@ -25,14 +25,16 @@ export default defineConfig(({ command }) => ({
       manifest: {
         name: 'pomokitty',
         short_name: 'pomokitty',
+        description: 'Спокойный таймер фокуса для детей: одно дело, короткий отдых и котики за внимание.',
+        id: '/pomokitty/app/',
         start_url: '/pomokitty/app/',
         scope: '/pomokitty/app/',
         display: 'standalone',
         theme_color: '#99432c',
         background_color: '#fffaf1',
         icons: [
-          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
         ],
       },
       workbox: {
