@@ -1,15 +1,212 @@
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#99432c" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>pomokitty</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>pomokitty — спокойный фокус для детей</title>
+  <style>
+    :root {
+      --paper: #fff8ea;
+      --surface: #fffdf8;
+      --ink: #233a55;
+      --muted: #647080;
+      --accent: #c96345;
+      --accent-deep: #99432c;
+      --mint: #a9d8bf;
+      --mint-pale: #e8f4ee;
+      --line: #d9cbb7;
+      --max: 1160px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 320px; color: var(--ink); background: var(--paper); font-family: ui-rounded, "SF Pro Rounded", "Avenir Next", Nunito, system-ui, sans-serif; }
+    a { color: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    .wrap { width: min(calc(100% - 48px), var(--max)); margin: 0 auto; }
+    .eyebrow { margin: 0 0 14px; color: var(--accent); font-size: 12px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .display { margin: 0; max-width: 850px; font-size: clamp(44px, 6.4vw, 83px); line-height: .96; letter-spacing: -.07em; text-wrap: balance; }
+    .h2 { margin: 0; font-size: clamp(32px, 4vw, 54px); line-height: 1; letter-spacing: -.06em; text-wrap: balance; }
+    .lead { max-width: 580px; margin: 22px 0 0; color: color-mix(in srgb, var(--ink), transparent 22%); font-size: 18px; line-height: 1.55; text-wrap: pretty; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 23px; border: 0; border-radius: 15px; color: var(--surface); background: var(--accent); box-shadow: 0 10px 22px rgb(153 67 44 / 20%); font-size: 16px; font-weight: 800; text-decoration: none; transition: transform .18s ease, background .18s ease; }
+    .button:hover { background: var(--accent-deep); transform: translateY(-2px); }
+    .button:focus-visible, summary:focus-visible { outline: 3px solid #245d8d; outline-offset: 4px; }
+    header { position: relative; z-index: 3; border-bottom: 1px solid rgb(217 203 183 / 70%); }
+    .nav { display: flex; align-items: center; justify-content: space-between; min-height: 74px; gap: 24px; }
+    .brand { color: var(--accent); font-size: 24px; font-weight: 900; letter-spacing: -.07em; text-decoration: none; }
+    .nav-links { display: flex; align-items: center; gap: 24px; color: color-mix(in srgb, var(--ink), transparent 30%); font-size: 14px; font-weight: 750; }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--ink); }
+
+    .hero { position: relative; overflow: clip; padding: 86px 0 98px; }
+    .hero::before { position: absolute; z-index: -1; width: 690px; height: 690px; border-radius: 50%; right: -180px; top: 46px; background: var(--mint); content: ""; }
+    .hero::after { position: absolute; z-index: -1; width: 250px; height: 250px; border-radius: 50%; left: -120px; bottom: 80px; background: color-mix(in srgb, var(--accent), transparent 88%); content: ""; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(330px, .75fr); align-items: center; gap: 54px; }
+    .hero-copy { padding-block: 36px; }
+    .hero-copy .display em { color: var(--accent); font-style: normal; }
+    .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 33px; }
+    .quiet-note { max-width: 250px; color: var(--muted); font-size: 13px; font-weight: 650; line-height: 1.4; }
+    .hero-art { position: relative; justify-self: center; width: min(100%, 350px); transform: rotate(4deg); }
+    .phone { position: relative; overflow: hidden; border: 10px solid #20354e; border-radius: 40px; background: #20354e; box-shadow: 0 32px 55px rgb(35 58 85 / 24%); }
+    .phone::after { position: absolute; width: 38%; height: 23px; border-radius: 0 0 15px 15px; top: 0; left: 31%; background: #20354e; content: ""; }
+    .phone img { display: block; width: 100%; }
+    .hero-sticker { position: absolute; right: -54px; bottom: 48px; padding: 13px 16px; border: 2px solid var(--line); border-radius: 18px; color: var(--ink); background: var(--surface); box-shadow: 0 13px 25px rgb(35 58 85 / 12%); font-size: 14px; font-weight: 850; transform: rotate(-8deg); }
+    .hero-sticker span { color: var(--accent); }
+    .hero-cat { position: absolute; z-index: -1; width: 185px; right: -128px; bottom: -28px; filter: drop-shadow(0 16px 15px rgb(35 58 85 / 14%)); transform: rotate(10deg); }
+    .cat-note { position: relative; overflow: hidden; }
+    .cat-note img { position: absolute; width: 132px; right: -20px; bottom: -34px; opacity: .38; transform: rotate(-8deg); }
+    .cat-note p { position: relative; z-index: 1; }
+    .cat-corner { position: absolute; width: 150px; right: 7%; top: 32px; filter: drop-shadow(0 15px 15px rgb(0 0 0 / 13%)); transform: rotate(11deg); }
+    .closing-cat { position: absolute; width: 180px; z-index: 0; left: max(3%, calc(50% - 575px)); bottom: -52px; opacity: .78; transform: rotate(-9deg); }
+
+
+    .pains { padding: 105px 0; background: var(--surface); }
+    .pains-grid { display: grid; grid-template-columns: .88fr 1.12fr; gap: 76px; align-items: start; }
+    .pain-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+    .pain-list li { display: grid; grid-template-columns: 42px 1fr; gap: 13px; padding: 23px 0; border-bottom: 1px solid var(--line); font-size: 20px; font-weight: 750; line-height: 1.22; }
+    .pain-list b { color: var(--accent); font-size: 15px; }
+    .parent-note { padding: 31px; border-radius: 26px; background: var(--mint-pale); }
+    .parent-note p { margin: 0; font-size: clamp(24px, 2.5vw, 34px); font-weight: 800; line-height: 1.1; letter-spacing: -.045em; }
+    .parent-note p + p { margin-top: 22px; color: color-mix(in srgb, var(--ink), transparent 27%); font-size: 16px; font-weight: 650; line-height: 1.5; letter-spacing: 0; }
+
+    .rhythm { padding: 116px 0; }
+    .rhythm-head { display: grid; grid-template-columns: .9fr 1.1fr; gap: 64px; align-items: end; }
+    .rhythm-head .lead { margin: 0; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 58px; }
+    .step { min-height: 245px; padding: 27px; border-top: 4px solid var(--accent); background: var(--surface); }
+    .step:nth-child(2) { border-color: var(--mint); background: var(--mint-pale); }
+    .step:nth-child(3) { border-color: var(--ink); }
+    .step__number { display: block; margin-bottom: 45px; color: color-mix(in srgb, var(--ink), transparent 58%); font-size: 13px; font-weight: 850; letter-spacing: .08em; }
+    .step h3 { margin: 0; font-size: 27px; letter-spacing: -.045em; }
+    .step p { margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.45; }
+
+    .showcase { position: relative; overflow: hidden; padding: 112px 0 0; color: var(--surface); background: var(--ink); }
+    .showcase-grid { display: grid; grid-template-columns: 1fr minmax(330px, .75fr); gap: 64px; align-items: start; }
+    .showcase .eyebrow { color: var(--mint); }
+    .showcase .h2 { max-width: 650px; }
+    .showcase .lead { color: rgb(255 253 248 / 75%); }
+    .proofs { display: grid; gap: 18px; margin-top: 38px; }
+    .proof { display: grid; grid-template-columns: 30px 1fr; gap: 13px; max-width: 500px; font-size: 16px; line-height: 1.43; }
+    .proof i { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; color: var(--ink); background: var(--mint); font-size: 13px; font-style: normal; font-weight: 900; }
+    .showcase-card { position: relative; margin-bottom: -142px; transform: rotate(-4deg); }
+    .showcase-card .phone { border-color: #fffdf8; box-shadow: 0 28px 48px rgb(0 0 0 / 27%); }
+
+    .privacy { padding: 190px 0 112px; background: var(--mint-pale); }
+    .privacy-grid { display: grid; grid-template-columns: 1fr 1.1fr; gap: 68px; align-items: center; }
+    .privacy-mark { display: grid; width: 330px; height: 330px; place-items: center; border-radius: 50%; background: color-mix(in srgb, var(--mint), var(--surface) 46%); }
+    .privacy-mark img { width: 284px; height: auto; filter: drop-shadow(0 16px 16px rgb(35 58 85 / 12%)); }
+    .privacy-list { display: grid; gap: 0; margin: 29px 0 0; padding: 0; list-style: none; }
+    .privacy-list li { padding: 15px 0; border-top: 1px solid rgb(35 58 85 / 16%); font-weight: 780; line-height: 1.35; }
+    .privacy-list li:last-child { border-bottom: 1px solid rgb(35 58 85 / 16%); }
+
+    .start { padding: 112px 0; background: var(--surface); }
+    .start-top { display: flex; align-items: end; justify-content: space-between; gap: 28px; }
+    .start-grid { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 48px; margin-top: 55px; }
+    .start-item { padding-right: 20px; }
+    .start-item b { display: block; margin-bottom: 18px; color: var(--accent); font-size: 15px; }
+    .start-item h3 { margin: 0; font-size: 23px; letter-spacing: -.04em; }
+    .start-item p { margin: 10px 0 0; color: var(--muted); line-height: 1.45; }
+
+    .faq { padding: 108px 0; }
+    .faq-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 70px; align-items: start; }
+    .questions { border-top: 1px solid var(--line); }
+    details { border-bottom: 1px solid var(--line); }
+    summary { position: relative; padding: 22px 32px 22px 0; cursor: pointer; font-size: 18px; font-weight: 780; list-style: none; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { position: absolute; right: 3px; color: var(--accent); content: "+"; font-size: 25px; font-weight: 500; }
+    details[open] summary::after { content: "–"; }
+    details p { max-width: 570px; margin: -2px 0 22px; color: var(--muted); line-height: 1.5; }
+
+    .closing { position: relative; overflow: hidden; padding: 118px 0; color: var(--surface); background: var(--accent-deep); text-align: center; }
+    .closing::before, .closing::after { position: absolute; width: 340px; height: 340px; border: 1px solid rgb(255 253 248 / 20%); border-radius: 50%; content: ""; }
+    .closing::before { left: -150px; bottom: -190px; } .closing::after { top: -230px; right: -110px; }
+    .closing .wrap { position: relative; z-index: 1; display: grid; justify-items: center; }
+    .closing .h2 { max-width: 760px; }
+    .closing .lead { color: rgb(255 253 248 / 77%); }
+    .closing .button { margin-top: 31px; color: var(--accent-deep); background: var(--surface); box-shadow: none; }
+    .closing .button:hover { color: var(--surface); background: var(--ink); }
+    footer { padding: 28px 0 35px; color: color-mix(in srgb, var(--ink), transparent 42%); background: var(--paper); font-size: 13px; font-weight: 650; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 18px; }
+    .footer-inner a { color: var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+
+    @media (max-width: 780px) {
+      .wrap { width: min(calc(100% - 40px), var(--max)); }
+      .nav-links { display: none; }
+      .hero { padding: 48px 0 74px; }
+      .hero-grid, .pains-grid, .rhythm-head, .showcase-grid, .privacy-grid, .faq-grid { grid-template-columns: 1fr; gap: 36px; }
+      .hero-copy { padding-block: 0; }
+      .hero-art { margin-top: 4px; width: min(82%, 335px); }
+      .hero-cat { width: 122px; right: -85px; bottom: -14px; }
+      .cat-corner { width: 100px; right: -28px; top: 22px; }
+      .closing-cat { width: 130px; left: -26px; bottom: -36px; }
+      .hero-sticker { right: -34px; bottom: 25px; }
+      .pains, .rhythm, .start, .faq { padding: 76px 0; }
+      .steps, .start-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 36px; }
+      .step { min-height: auto; padding: 24px; } .step__number { margin-bottom: 24px; }
+      .showcase { padding-top: 78px; } .showcase-card { width: min(83%, 330px); margin: 8px auto -104px; }
+      .privacy { padding: 151px 0 76px; } .privacy-mark { width: 132px; height: 132px; } .privacy-mark img { width: 102px; }
+      .start-top { display: block; } .start-top .button { margin-top: 25px; }
+      .footer-inner { display: grid; }
+    }
+    @media (max-width: 430px) { .wrap { width: min(calc(100% - 32px), var(--max)); } .hero::before { width: 450px; height: 450px; right: -265px; top: 170px; } .display { font-size: 46px; } .lead { font-size: 16px; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .button { transition: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="nav wrap" aria-label="Навигация лендинга">
+      <a class="brand" href="#top">pomokitty</a>
+      <div class="nav-links"><a href="#how">Как это работает</a><a href="#parents">Для родителей</a><a href="#questions">Вопросы</a></div>
+      <a class="button" href="app/">Открыть приложение</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Таймер для детей и спокойствия дома</p>
+          <h1 class="display">Начинать дело проще, когда <em>не нужно уговаривать.</em></h1>
+          <p class="lead">pomokitty превращает одно небольшое дело в понятный фокус-раунд, короткий отдых и котика за настоящее время внимания.</p>
+          <div class="hero-actions"><a class="button" href="app/">Попробовать первый раунд</a><span class="quiet-note">Бесплатно. Без аккаунта, рекламы и сбора данных.</span></div>
+        </div>
+        <div class="hero-art" aria-label="Экран таймера pomokitty">
+          <div class="phone"><img src="%BASE_URL%landing/timer-screen.png" alt="Экран таймера pomokitty" /></div>
+          <div class="hero-sticker">Фокус — это <span>не гонка</span></div>
+          <img class="hero-cat" src="%BASE_URL%landing/cat-focus.png" alt="" />
+        </div>
+      </div>
+    </section>
+
+    <section class="pains" id="parents">
+      <div class="wrap pains-grid">
+        <div><p class="eyebrow">Знакомо?</p><h2 class="h2">Самое трудное — не сделать, а начать.</h2></div>
+        <div>
+          <ul class="pain-list"><li><b>01</b><span>Домашнее задание начинается с десятого напоминания.</span></li><li><b>02</b><span>Большая задача быстро кажется ребёнку неподъёмной.</span></li><li><b>03</b><span>Перерыв растягивается, а возвращение к делу становится спором.</span></li></ul>
+          <div class="parent-note cat-note"><img src="%BASE_URL%landing/cat-focus.png" alt="" /><p>pomokitty не контролирует ребёнка. Он даёт ему видимый, посильный следующий шаг.</p><p>Вы остаётесь рядом не как надзиратель, а как человек, который помогает договориться о ритме.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="rhythm" id="how">
+      <div class="wrap">
+        <div class="rhythm-head"><div><p class="eyebrow">Понятный ритм</p><h2 class="h2">Один раунд — одно дело.</h2></div><p class="lead">Техника помодоро делит большое «надо сделать» на спокойные отрезки. Ребёнок видит начало, конец и время на отдых.</p></div>
+        <div class="steps"><article class="step"><span class="step__number">01 · ФОКУС</span><h3>25 минут</h3><p>Выбираем одно маленькое дело и занимаемся только им.</p></article><article class="step"><span class="step__number">02 · ПАУЗА</span><h3>5 минут</h3><p>Встаём, пьём воду, смотрим в окно — без длинных видео и игр.</p></article><article class="step"><span class="step__number">03 · ПОДДЕРЖКА</span><h3>Котик за внимание</h3><p>Каждые 25 минут настоящего фокуса пополняют коллекцию.</p></article></div>
+      </div>
+    </section>
+
+    <section class="showcase">
+      <img class="cat-corner" src="%BASE_URL%landing/cat-celebrate.png" alt="" />
+      <div class="wrap showcase-grid"><div><p class="eyebrow">Прогресс, который видно</p><h2 class="h2">Не оценка ребёнка.<br>Повод заметить усилие.</h2><p class="lead">В статистике остаётся время фокуса и собранные котики. Можно отправить близким красивую карточку — без таблиц, рейтингов и сравнений.</p><div class="proofs"><div class="proof"><i>✓</i><span>Имя ребёнка и цифры на карточке берутся только с его устройства.</span></div><div class="proof"><i>✓</i><span>Ребёнок может видеть свой путь, а не соревноваться с другими.</span></div></div></div><div class="showcase-card"><div class="phone"><img src="%BASE_URL%landing/stats-screen.png" alt="Экран статистики pomokitty" /></div></div></div>
+    </section>
+
+    <section class="privacy"><div class="wrap privacy-grid"><div class="privacy-mark"><img src="%BASE_URL%landing/cat-private.png" alt="Котик pomokitty" /></div><div><p class="eyebrow">Личное остаётся личным</p><h2 class="h2">Удобный сервис не должен собирать данные о ребёнке.</h2><ul class="privacy-list"><li>Без аккаунта и регистрации.</li><li>Без рекламы, трекеров и аналитики.</li><li>Имя, настройки и история хранятся только в браузере на устройстве.</li><li>Всё можно удалить в настройках.</li></ul></div></div></section>
+
+    <section class="start"><div class="wrap"><div class="start-top"><div><p class="eyebrow">Первый вечер с pomokitty</p><h2 class="h2">Начните не с идеального плана,<br>а с одного раунда.</h2></div><a class="button" href="app/">Открыть таймер</a></div><div class="start-grid"><article class="start-item"><b>01</b><h3>Выберите маленькое дело</h3><p>Например: прочитать две страницы, решить три примера или разобрать стол.</p></article><article class="start-item"><b>02</b><h3>Договоритесь о правилах</h3><p>Телефон лежит экраном вниз, а взрослый не напоминает до звонка таймера.</p></article><article class="start-item"><b>03</b><h3>Заметьте усилие</h3><p>Спросите не «всё сделал?», а «что помогло тебе остаться с делом?».</p></article></div></div></section>
+
+    <section class="faq" id="questions"><div class="wrap faq-grid"><div><p class="eyebrow">Без мелкого шрифта</p><h2 class="h2">Несколько важных ответов.</h2></div><div class="questions"><details><summary>Это бесплатно?</summary><p>Да. pomokitty открыт бесплатно — без подписки, рекламы и платных уровней.</p></details><details><summary>Нужен ли интернет?</summary><p>После первого открытия приложение работает офлайн. Таймер, звуки и данные остаются на устройстве.</p></details><details><summary>Подойдёт ли, если ребёнок не любит таймеры?</summary><p>Можно начать с одного короткого и спокойного раунда. Таймер не оценивает и не ругает — он просто помогает увидеть границу между делом и отдыхом.</p></details><details><summary>Можно ли изменить длительность?</summary><p>Да. В настройках родитель может настроить фокус, короткий и длинный перерывы под ваш привычный ритм.</p></details></div></div></section>
+
+    <section class="closing"><img class="closing-cat" src="%BASE_URL%landing/cat-celebrate.png" alt="" /><div class="wrap"><p class="eyebrow" style="color:#ffe7dd">Первый шаг</p><h2 class="h2">Сегодня достаточно одного спокойного фокус-раунда.</h2><p class="lead">Откройте pomokitty вместе с ребёнком — и попробуйте начать с малого.</p><a class="button" href="app/">Открыть pomokitty</a></div></section>
+  </main>
+  <footer><div class="wrap footer-inner"><span>pomokitty — спокойный таймер фокуса для детей.</span><a href="app/">pavelnasuta.github.io/pomokitty</a></div></footer>
+</body>
 </html>

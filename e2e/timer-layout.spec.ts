@@ -33,7 +33,7 @@ test(`keeps every active timer control and navigation non-overlapping at ${viewp
     )
   })
 
-  await page.goto('/')
+  await page.goto('/app/')
   await page.getByRole('button', { name: 'Start' }).click()
 
   const geometry = await page.locator('.timer-screen').evaluate((timerScreen) => {

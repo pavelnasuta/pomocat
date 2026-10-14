@@ -1,3 +1,4 @@
+import { resolve } from 'node:path'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vitest/config'
@@ -9,6 +10,14 @@ export default defineConfig(({ command }) => ({
     port: Number(process.env.POMOKITTY_E2E_PORT ?? 5173),
     strictPort: true,
   },
+  build: {
+    rollupOptions: {
+      input: {
+        landing: resolve(__dirname, 'index.html'),
+        app: resolve(__dirname, 'app/index.html'),
+      },
+    },
+  },
   plugins: [
     ...react(),
     ...VitePWA({
@@ -16,6 +25,8 @@ export default defineConfig(({ command }) => ({
       manifest: {
         name: 'pomokitty',
         short_name: 'pomokitty',
+        start_url: '/pomokitty/app/',
+        scope: '/pomokitty/app/',
         display: 'standalone',
         theme_color: '#99432c',
         background_color: '#fffaf1',

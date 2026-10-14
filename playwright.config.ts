@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     env: { POMOKITTY_E2E_PORT: '4173' },
-    url: 'http://127.0.0.1:4173/pomokitty/',
+    url: 'http://127.0.0.1:4173/app/',
     reuseExistingServer: false,
     timeout: 120_000,
   },

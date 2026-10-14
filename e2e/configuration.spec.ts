@@ -10,7 +10,7 @@ test('starts the acceptance server with the literal development command', () => 
   expect(config.webServer).toMatchObject({
     command: 'npm run dev',
     env: { POMOKITTY_E2E_PORT: '4173' },
-    url: 'http://127.0.0.1:4173/pomokitty/',
+    url: 'http://127.0.0.1:4173/app/',
     reuseExistingServer: false,
   })
 })
@@ -19,8 +19,8 @@ test('runs the isolated E2E suite', () => {
   expect(test.info().file).toContain('/e2e/')
 })
 
-test('serves development assets at the Pages route', async ({ page }) => {
-  await page.goto('/pomokitty/')
+test('serves the application at the development app route', async ({ page }) => {
+  await page.goto('/app/')
 
   await expect(page.locator('script[src="/@vite/client"]')).toHaveCount(1)
   await expect(page.locator('script[src="/src/main.tsx"]')).toHaveCount(1)
@@ -28,7 +28,7 @@ test('serves development assets at the Pages route', async ({ page }) => {
 
 test('production build emits Pages-prefixed assets', async () => {
   await execFileAsync('npm', ['run', 'build'])
-  const index = await readFile('dist/index.html', 'utf8')
+  const index = await readFile('dist/app/index.html', 'utf8')
 
   expect(index).toMatch(/(?:href|src)="\/pomokitty\/assets\//)
   expect(index).toContain('href="/pomokitty/manifest.webmanifest"')
@@ -49,7 +49,7 @@ test('keeps settings readable in a dedicated scrollable content area at mobile s
     }))
   })
 
-  await page.goto('/')
+  await page.goto('/app/')
   await page.getByRole('button', { name: 'Настройки' }).click()
 
   const settings = page.locator('.app-section--scroll')
@@ -68,13 +68,13 @@ test('production Pages app and local audio remain available offline after servic
   try {
     await expect.poll(async () => {
       try {
-        const response = await fetch('http://127.0.0.1:4174/pomokitty/')
+        const response = await fetch('http://127.0.0.1:4174/pomokitty/app/')
         return response.ok
       } catch {
         return false
       }
     }, { timeout: 30_000 }).toBe(true)
-    await page.goto('http://127.0.0.1:4174/pomokitty/')
+    await page.goto('http://127.0.0.1:4174/pomokitty/app/')
     await page.reload()
     await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null), { timeout: 30_000 }).toBe(true)
     await context.setOffline(true)

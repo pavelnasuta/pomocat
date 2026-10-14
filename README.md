@@ -1,6 +1,6 @@
 # pomokitty
 
-Pomokitty — локальный Pomodoro-таймер для детей на React и Vite.
+Pomokitty — локальный Pomodoro-таймер для детей на React и Vite. На главной странице расположен лендинг для родителей, само приложение открывается по пути `/app/`.
 
 ## Локальный запуск
 
@@ -41,7 +41,9 @@ npm run lint && npm run test && npm run build && npm run test:e2e
 
 При отправке изменений в ветку `main` GitHub Actions собирает `dist` и публикует его в GitHub Pages:
 
-<https://pavelnasuta.github.io/pomokitty/>
+<https://pavelnasuta.github.io/pomokitty/> — лендинг
+
+<https://pavelnasuta.github.io/pomokitty/app/> — приложение
 
 ## Команды
 

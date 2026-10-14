@@ -46,6 +46,8 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
   expect(manifest).toMatchObject({
     name: 'pomokitty',
     short_name: 'pomokitty',
+    start_url: '/pomokitty/app/',
+    scope: '/pomokitty/app/',
     display: 'standalone',
     theme_color: '#99432c',
     icons: [
@@ -55,8 +57,8 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
   })
 }, 15_000)
 
-test('configures edge-to-edge status bars for cutout screens', () => {
-  const index = readFileSync(`${projectRoot}index.html`, 'utf8')
+test('configures edge-to-edge status bars for the standalone app route', () => {
+  const index = readFileSync(`${projectRoot}app/index.html`, 'utf8')
 
   expect(index).toContain('viewport-fit=cover')
   expect(index).toContain('name="apple-mobile-web-app-capable" content="yes"')

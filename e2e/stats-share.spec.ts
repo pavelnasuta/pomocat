@@ -29,7 +29,7 @@ test('shares a PNG cat card with the child name, statistics, and app link', asyn
     })
   })
 
-  await page.goto('/')
+  await page.goto('/app/')
   await page.getByRole('button', { name: 'Статистика' }).click()
   await page.getByRole('button', { name: 'Поделиться котиками' }).click()
 
