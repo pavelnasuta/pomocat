@@ -19,6 +19,7 @@ test('makes the parent landing the root page and links to the app route', () => 
   expect(landing).toContain('timer-screen.png')
   expect(landing).toContain('НИИ МОЗГИ')
   expect(landing).toContain('Установите pomokitty как приложение')
+  expect(landing).toContain('href="#install"')
   expect(landing).toContain('iPhone или iPad')
   expect(landing).toContain('Android')
   expect(landing).not.toContain('.phone::after')
