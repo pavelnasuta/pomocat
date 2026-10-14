@@ -603,6 +603,16 @@ input:focus-visible {
   gap: 12px;
 }
 
+/* Keep every pose in the focus-cat frame so phase changes cannot move controls. */
+.timer-screen__actions .mascot {
+  aspect-ratio: 428 / 340;
+}
+
+.timer-screen__actions .mascot__image {
+  height: 100%;
+  object-fit: contain;
+}
+
 .timer-screen__actions p {
   margin: 0;
   color: var(--color-terracotta);

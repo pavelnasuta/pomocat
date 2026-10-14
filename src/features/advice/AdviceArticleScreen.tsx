@@ -18,6 +18,9 @@ export function AdviceArticleScreen({ article, locale, onBack }: AdviceArticleSc
       {(['body1', 'body2', 'body3'] as const).map((part) => (
         <p key={part}>{t(`advice.${article}.${part}`)}</p>
       ))}
+      {article === 'pomodoro' && (['body4', 'body5'] as const).map((part) => (
+        <p key={part}>{t(`advice.pomodoro.${part}`)}</p>
+      ))}
       <button type="button" className="advice-article__back" onClick={onBack}>
         {t('advice.back')}
       </button>

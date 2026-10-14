@@ -104,6 +104,18 @@
     .start-item h3 { margin: 0; font-size: 23px; letter-spacing: -.04em; }
     .start-item p { margin: 10px 0 0; color: var(--muted); line-height: 1.45; }
 
+    .install { padding: 112px 0; background: var(--mint-pale); }
+    .install-head { display: grid; grid-template-columns: .9fr 1.1fr; gap: 64px; align-items: end; }
+    .install-head .lead { margin: 0; }
+    .install-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 48px; }
+    .install-card { padding: 30px; border: 1px solid rgb(35 58 85 / 13%); border-radius: 26px; background: var(--surface); box-shadow: 0 14px 30px rgb(35 58 85 / 6%); }
+    .install-card__icon { display: grid; width: 42px; height: 42px; place-items: center; margin-bottom: 26px; border-radius: 13px; color: var(--surface); background: var(--accent); font-size: 20px; font-weight: 900; }
+    .install-card:nth-child(2) .install-card__icon { color: var(--ink); background: var(--mint); }
+    .install-card h3 { margin: 0; font-size: 27px; letter-spacing: -.045em; }
+    .install-card ol { display: grid; gap: 11px; margin: 20px 0 0; padding-left: 22px; color: var(--muted); line-height: 1.45; }
+    .install-card li::marker { color: var(--accent); font-weight: 850; }
+    .install-note { margin: 22px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
     .faq { padding: 108px 0; }
     .faq-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 70px; align-items: start; }
     .questions { border-top: 1px solid var(--line); }
@@ -136,9 +148,11 @@
       .cat-corner { width: 100px; right: 22px; top: 22px; }
       .closing-cat { width: 130px; left: -26px; bottom: -36px; }
       .hero-sticker { right: -34px; bottom: 25px; }
-      .pains, .rhythm, .start, .faq { padding: 76px 0; }
-      .steps, .start-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 36px; }
+      .pains, .rhythm, .start, .install, .faq { padding: 76px 0; }
+      .steps, .start-grid, .install-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 36px; }
       .step { min-height: auto; padding: 24px; } .step__number { margin-bottom: 24px; }
+      .install-head { grid-template-columns: 1fr; gap: 20px; }
+      .install-card { padding: 25px; }
       .showcase { padding-top: 78px; } .showcase-card { width: min(83%, 330px); margin: 8px auto -104px; }
       .privacy { padding: 151px 0 76px; } .privacy-mark { width: 132px; height: 132px; } .privacy-mark img { width: 102px; }
       .start-top { display: block; } .start-top .button { margin-top: 25px; }
@@ -152,7 +166,7 @@
   <header>
     <nav class="nav wrap" aria-label="Навигация лендинга">
       <a class="brand" href="#top">pomokitty</a>
-      <div class="nav-links"><a href="#how">Как это работает</a><a href="#parents">Для родителей</a><a href="#questions">Вопросы</a></div>
+      <div class="nav-links"><a href="#how">Как это работает</a><a href="#parents">Для родителей</a><a href="#install">Установить</a><a href="#questions">Вопросы</a></div>
       <a class="button" href="app/">Открыть приложение</a>
     </nav>
   </header>
@@ -198,6 +212,8 @@
     <section class="privacy"><div class="wrap privacy-grid"><div class="privacy-mark"><img src="%BASE_URL%landing/cat-private.png" alt="Котик pomokitty" /></div><div><p class="eyebrow">Личное остаётся личным</p><h2 class="h2">Удобный сервис не должен собирать данные о ребёнке.</h2><ul class="privacy-list"><li>Без аккаунта и регистрации.</li><li>Без рекламы, трекеров и аналитики.</li><li>Имя, настройки и история хранятся только в браузере на устройстве.</li><li>Всё можно удалить в настройках.</li></ul></div></div></section>
 
     <section class="start"><div class="wrap"><div class="start-top"><div><p class="eyebrow">Первый вечер с pomokitty</p><h2 class="h2">Начните не с идеального плана,<br>а с одного раунда.</h2></div><a class="button" href="app/">Открыть таймер</a></div><div class="start-grid"><article class="start-item"><b>01</b><h3>Выберите маленькое дело</h3><p>Например: прочитать две страницы, решить три примера или разобрать стол.</p></article><article class="start-item"><b>02</b><h3>Договоритесь о правилах</h3><p>Телефон лежит экраном вниз, а взрослый не напоминает до звонка таймера.</p></article><article class="start-item"><b>03</b><h3>Заметьте усилие</h3><p>Спросите не «всё сделал?», а «что помогло тебе остаться с делом?».</p></article></div></div></section>
+
+    <section class="install" id="install"><div class="wrap"><div class="install-head"><div><p class="eyebrow">Всегда под рукой</p><h2 class="h2">Установите pomokitty как приложение</h2></div><p class="lead">Добавьте pomokitty на главный экран — появится отдельная иконка. После первого открытия таймер будет доступен и без интернета.</p></div><div class="install-grid"><article class="install-card"><span class="install-card__icon" aria-hidden="true">⌘</span><h3>iPhone или iPad</h3><ol><li>Откройте pomokitty в браузере Safari.</li><li>Нажмите кнопку «Поделиться».</li><li>Выберите «На экран «Домой»», затем «Добавить».</li></ol></article><article class="install-card"><span class="install-card__icon" aria-hidden="true">⋮</span><h3>Android</h3><ol><li>Откройте pomokitty в Chrome.</li><li>Нажмите меню ⋮ в правом верхнем углу.</li><li>Выберите «Установить приложение» или «Добавить на главный экран».</li></ol></article></div><p class="install-note">Установка не создаёт аккаунт: имя, настройки и история остаются только на вашем устройстве.</p></div></section>
 
     <section class="faq" id="questions"><div class="wrap faq-grid"><div><p class="eyebrow">Без мелкого шрифта</p><h2 class="h2">Несколько важных ответов.</h2></div><div class="questions"><details><summary>Это бесплатно?</summary><p>Да. pomokitty открыт бесплатно — без подписки, рекламы и платных уровней.</p></details><details><summary>Нужен ли интернет?</summary><p>После первого открытия приложение работает офлайн. Таймер, звуки и данные остаются на устройстве.</p></details><details><summary>Подойдёт ли, если ребёнок не любит таймеры?</summary><p>Можно начать с одного короткого и спокойного раунда. Таймер не оценивает и не ругает — он просто помогает увидеть границу между делом и отдыхом.</p></details><details><summary>Можно ли изменить длительность?</summary><p>Да. В настройках родитель может настроить фокус, короткий и длинный перерывы под ваш привычный ритм.</p></details></div></div></section>
 

@@ -15,3 +15,12 @@ test('shows the selected article with an EPS cat illustration and a return butto
 
   expect(onBack).toHaveBeenCalledOnce()
 })
+
+test('explains how to install pomokitty as an app from the usage guide', () => {
+  const onBack = vi.fn()
+  render(<AdviceArticleScreen article="pomodoro" locale="ru" onBack={onBack} />)
+
+  expect(screen.getByText(/iPhone или iPad: открой pomokitty в Safari/)).toBeInTheDocument()
+  expect(screen.getByText(/Android: открой pomokitty в Chrome/)).toBeInTheDocument()
+  expect(screen.getByRole('article').querySelectorAll('p')).toHaveLength(5)
+})
