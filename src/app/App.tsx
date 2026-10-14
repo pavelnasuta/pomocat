@@ -114,7 +114,12 @@ export function App() {
         {activeSection === 'stats' && (
           <section className="app-section app-section--scroll" aria-labelledby="stats-section-title">
             <h1 id="stats-section-title">{t('navigation.stats')}</h1>
-            <StatsScreen history={appData.history} locale={effectiveLocale} />
+            <StatsScreen
+              history={appData.history}
+              locale={effectiveLocale}
+              childName={appData.settings.childName}
+              theme={theme}
+            />
           </section>
         )}
 

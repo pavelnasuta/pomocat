@@ -51,3 +51,9 @@ test('uses the current app locale for English statistics', () => {
   expect(screen.getByRole('heading', { name: 'Completed sessions' })).toBeInTheDocument()
   expect(within(screen.getByTestId('stats-week')).getByText('75 min')).toBeInTheDocument()
 })
+
+test('places the share-cats button after the stat tiles and before cat totals', () => {
+  render(<StatsScreen history={history} childName="Маша" />)
+
+  expect(screen.getByRole('button', { name: 'Поделиться котиками' })).toBeInTheDocument()
+})

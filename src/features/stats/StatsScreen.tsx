@@ -1,4 +1,5 @@
-import { Cat } from 'lucide-react'
+import { useState } from 'react'
+import { Cat, Share2 } from 'lucide-react'
 import {
   getAllSessionCount,
   getDailyMinutes,
@@ -8,12 +9,16 @@ import {
 } from '../../domain/stats'
 import type { Locale, SessionHistoryItem } from '../../domain/types'
 import { useTranslation } from '../../i18n/useTranslation'
+import type { ThemeId } from '../../theme/themes'
+import { createStatsShareImage, createStatsShareText, saveStatsShareCard } from './shareCard'
 
 type Translate = ReturnType<typeof useTranslation>['t']
 
 export interface StatsScreenProps {
   history: SessionHistoryItem[]
   locale?: Locale
+  childName?: string
+  theme?: ThemeId
 }
 
 function formatMinutes(minutes: number, t: Translate): string {
@@ -40,21 +45,57 @@ function SessionCountTile({ count, label, t }: SessionCountTileProps) {
   )
 }
 
-export function StatsScreen({ history, locale = 'ru' }: StatsScreenProps) {
+export function StatsScreen({ history, locale = 'ru', childName = 'pomokitty', theme = 'terracotta' }: StatsScreenProps) {
   const { t } = useTranslation(locale)
+  const [shareStatus, setShareStatus] = useState<'idle' | 'sharing' | 'shared' | 'saved' | 'error'>('idle')
   const now = new Date()
+  const todayMinutes = Math.round(getDailyMinutes(history, now))
+  const weekMinutes = Math.round(getWeeklyMinutes(history, now))
+  const cats = getAllSessionCount(history)
+
+  async function shareCats() {
+    setShareStatus('sharing')
+    const input = { childName, todayMinutes, weekMinutes, cats, locale, theme }
+    const text = createStatsShareText(input)
+
+    try {
+      const image = await createStatsShareImage(input)
+      const shareData = { title: 'pomokitty', text, files: [image] }
+      if (navigator.share && (!navigator.canShare || navigator.canShare(shareData))) {
+        await navigator.share(shareData)
+        setShareStatus('shared')
+        return
+      }
+      await saveStatsShareCard(image, text)
+      setShareStatus('saved')
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        setShareStatus('idle')
+        return
+      }
+      setShareStatus('error')
+    }
+  }
 
   return (
     <section className="stats-screen" aria-label={t('navigation.stats')}>
       <div className="stats-screen__totals">
         <article className="stats-screen__total" data-testid="stats-today">
           <h2>{t('stats.today')}</h2>
-          <output>{formatMinutes(getDailyMinutes(history, now), t)}</output>
+          <output>{formatMinutes(todayMinutes, t)}</output>
         </article>
         <article className="stats-screen__total" data-testid="stats-week">
           <h2>{t('stats.week')}</h2>
-          <output>{formatMinutes(getWeeklyMinutes(history, now), t)}</output>
+          <output>{formatMinutes(weekMinutes, t)}</output>
         </article>
+      </div>
+
+      <div className="stats-screen__share">
+        <button type="button" onClick={shareCats} disabled={shareStatus === 'sharing'}>
+          <Share2 aria-hidden size={18} strokeWidth={2} />
+          {t('stats.share.action')}
+        </button>
+        {shareStatus !== 'idle' && <p role="status">{t(`stats.share.${shareStatus}`)}</p>}
       </div>
 
       <section className="stats-screen__sessions" aria-label={t('stats.completed.all')}>

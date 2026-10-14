@@ -963,6 +963,36 @@ input:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.stats-screen__share {
+  display: grid;
+  gap: 8px;
+  margin-block: 14px;
+}
+
+.stats-screen__share button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border-radius: 14px;
+  color: var(--color-surface);
+  background: var(--color-terracotta);
+  font-weight: 750;
+}
+
+.stats-screen__share button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.stats-screen__share [role='status'] {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-dark-blue), transparent 25%);
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
 .stats-screen__sessions {
   display: grid;
   gap: 12px;
