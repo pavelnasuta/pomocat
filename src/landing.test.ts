@@ -32,6 +32,17 @@ test('makes the parent landing the root page and links to the app route', () => 
   expect(landing).not.toContain('class="hero-cat"')
 })
 
+test('loads Yandex Metrika only on the public landing', () => {
+  const landing = readFileSync(`${projectRoot}index.html`, 'utf8')
+  const app = readFileSync(`${projectRoot}app/index.html`, 'utf8')
+
+  expect(landing).toContain('https://mc.yandex.ru/metrika/tag.js?id=113671164')
+  expect(landing).toContain("ym(113671164, 'init'")
+  expect(landing).toContain('https://mc.yandex.ru/watch/113671164')
+  expect(app).not.toContain('mc.yandex.ru')
+  expect(app).not.toContain('ym(113671164')
+})
+
 test('builds the React PWA at the app route', () => {
   buildSite()
 
