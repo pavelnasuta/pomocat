@@ -40,7 +40,7 @@ test('registers a PWA plugin for pomokitty production builds', () => {
   expect(resolvedConfig.base).toBe('/pomokitty/')
 })
 
-test('builds a standalone pomokitty manifest with both local icons', () => {
+test('builds a standalone pomokitty manifest with regular and maskable app icons', () => {
   const { manifest } = buildPwa()
 
   expect(manifest).toMatchObject({
@@ -53,8 +53,9 @@ test('builds a standalone pomokitty manifest with both local icons', () => {
     display: 'standalone',
     theme_color: '#99432c',
     icons: [
-      { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: 'icons/icon-192-v3.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: 'icons/icon-512-v3.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: 'icons/icon-512-maskable-v3.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
   })
 }, 15_000)
@@ -73,13 +74,22 @@ test('includes browser and Apple home-screen icons for the public site', () => {
   const app = readFileSync(`${projectRoot}app/index.html`, 'utf8')
 
   for (const document of [landing, app]) {
-    expect(document).toContain('rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml"')
-    expect(document).toContain('rel="icon" href="%BASE_URL%favicon.ico" sizes="any"')
-    expect(document).toContain('rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png"')
+    expect(document).toContain('rel="icon" href="%BASE_URL%favicon-v3.svg" type="image/svg+xml"')
+    expect(document).toContain('rel="icon" type="image/png" sizes="32x32" href="%BASE_URL%favicon-32-v3.png"')
+    expect(document).toContain('rel="icon" href="%BASE_URL%favicon-v3.ico" sizes="any"')
+    expect(document).toContain('rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%icons/apple-touch-icon-v3.png"')
     expect(document).toContain('name="twitter:card" content="summary_large_image"')
   }
 
-  for (const asset of ['favicon.svg', 'favicon.ico', 'social-preview.png', 'icons/apple-touch-icon.png']) {
+  for (const asset of [
+    'favicon-v3.svg',
+    'favicon-v3.ico',
+    'social-preview.png',
+    'icons/apple-touch-icon-v3.png',
+    'icons/icon-192-v3.png',
+    'icons/icon-512-v3.png',
+    'icons/icon-512-maskable-v3.png',
+  ]) {
     expect(existsSync(`${projectRoot}public/${asset}`)).toBe(true)
   }
 })
@@ -97,8 +107,9 @@ test('precaches only the approved background audio in the service worker', () =>
 })
 
 test('includes local icons for the web app manifest', () => {
-  expect(existsSync(`${projectRoot}public/icons/icon-192.png`)).toBe(true)
-  expect(existsSync(`${projectRoot}public/icons/icon-512.png`)).toBe(true)
+  expect(existsSync(`${projectRoot}public/icons/icon-192-v3.png`)).toBe(true)
+  expect(existsSync(`${projectRoot}public/icons/icon-512-v3.png`)).toBe(true)
+  expect(existsSync(`${projectRoot}public/icons/icon-512-maskable-v3.png`)).toBe(true)
 })
 
 test('deploys the built site through the GitHub Pages action chain', () => {

@@ -12,6 +12,13 @@ test('keeps the app shell inside the stable mobile viewport after extending into
   expect(css).toMatch(/\.app-shell\s*\{[\s\S]*?height:\s*100svh;/)
 })
 
+test('extends the installed app shell through the iPhone home-indicator inset', () => {
+  const css = readFileSync(`${projectRoot}src/app/app.css`, 'utf8')
+
+  expect(css).toMatch(/\.app-shell\s*\{[\s\S]*?height:\s*calc\(100svh\s*\+\s*env\(safe-area-inset-bottom\)\);/)
+  expect(css).toMatch(/\.bottom-nav\s*\{[\s\S]*?padding:\s*8px\s+12px\s+max\(8px,\s*env\(safe-area-inset-bottom\)\);/)
+})
+
 test('normalizes the timer mascot frame across every pose', () => {
   const css = readFileSync(`${projectRoot}src/app/app.css`, 'utf8')
 

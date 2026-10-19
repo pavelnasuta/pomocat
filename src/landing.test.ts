@@ -19,7 +19,7 @@ test('makes the parent landing the root page and links to the app route', () => 
   expect(landing).toContain('timer-screen.png')
   expect(landing).toContain('property="og:image" content="https://pavelnasuta.github.io/pomokitty/social-preview.png"')
   expect(landing).toContain('name="twitter:card" content="summary_large_image"')
-  expect(landing).toContain('rel="apple-touch-icon" href="%BASE_URL%icons/apple-touch-icon.png"')
+  expect(landing).toContain('rel="apple-touch-icon" sizes="180x180" href="%BASE_URL%icons/apple-touch-icon-v3.png"')
   expect(landing).toContain('НИИ МОЗГИ')
   expect(landing).toContain('Установите pomokitty как приложение')
   expect(landing).toContain('href="#install"')

@@ -402,6 +402,8 @@ input:focus-visible {
   grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100vh;
   height: 100svh;
+  height: calc(100vh + env(safe-area-inset-bottom));
+  height: calc(100svh + env(safe-area-inset-bottom));
   overflow: hidden;
   background: var(--color-cream);
 }
