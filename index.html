@@ -54,7 +54,9 @@
     .button:focus-visible, summary:focus-visible { outline: 3px solid #245d8d; outline-offset: 4px; }
     header { position: relative; z-index: 3; border-bottom: 1px solid rgb(217 203 183 / 70%); }
     .nav { display: flex; align-items: center; justify-content: space-between; min-height: 74px; gap: 24px; }
-    .brand { color: var(--accent); font-size: 24px; font-weight: 900; letter-spacing: -.07em; text-decoration: none; }
+    .brand { display: inline-flex; align-items: center; gap: 9px; color: var(--accent); font-size: 24px; font-weight: 900; letter-spacing: -.07em; text-decoration: none; }
+    .brand__mark { display: block; width: 34px; height: 34px; border-radius: 10px; box-shadow: 0 4px 10px rgb(153 67 44 / 18%); }
+    .brand__wordmark { line-height: 1; }
     .nav-links { display: flex; align-items: center; gap: 24px; color: color-mix(in srgb, var(--ink), transparent 30%); font-size: 14px; font-weight: 750; }
     .nav-links a { text-decoration: none; }
     .nav-links a:hover { color: var(--ink); }
@@ -158,8 +160,10 @@
     .closing .button { margin-top: 31px; color: var(--accent-deep); background: var(--surface); box-shadow: none; }
     .closing .button:hover { color: var(--surface); background: var(--ink); }
     footer { padding: 28px 0 35px; color: color-mix(in srgb, var(--ink), transparent 42%); background: var(--paper); font-size: 13px; font-weight: 650; }
-    .footer-inner { display: flex; justify-content: space-between; gap: 18px; }
+    .footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
     .footer-inner a { color: var(--accent); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+    .footer-brand { display: inline-flex; align-items: center; gap: 8px; flex: none; color: var(--accent); font-size: 17px; font-weight: 900; letter-spacing: -.055em; text-decoration: none; }
+    .footer-brand__mark { display: block; width: 28px; height: 28px; border-radius: 9px; }
 
     @media (max-width: 780px) {
       .wrap { width: min(calc(100% - 40px), var(--max)); }
@@ -188,7 +192,7 @@
 <body>
   <header>
     <nav class="nav wrap" aria-label="Навигация лендинга">
-      <a class="brand" href="#top">pomokitty</a>
+      <a class="brand" href="#top"><img class="brand__mark" src="%BASE_URL%icons/icon-192-v3.png" alt="" /><span class="brand__wordmark">pomokitty</span></a>
       <div class="nav-links"><a href="#how">Как это работает</a><a href="#parents">Для родителей</a><a href="#install">Установить</a><a href="#questions">Вопросы</a></div>
       <a class="button" href="app/">Открыть приложение</a>
     </nav>
@@ -242,6 +246,6 @@
 
     <section class="closing"><img class="closing-cat" src="%BASE_URL%landing/cat-celebrate.png" alt="" /><div class="wrap"><p class="eyebrow" style="color:#ffe7dd">Первый шаг</p><h2 class="h2">Сегодня достаточно одного спокойного фокус-раунда.</h2><p class="lead">Откройте pomokitty вместе с ребёнком — и попробуйте начать с малого.</p><a class="button" href="app/">Открыть pomokitty</a></div></section>
   </main>
-  <footer><div class="wrap footer-inner"><span>pomokitty — спокойный таймер фокуса для детей.</span><a href="https://t.me/niimozgii" target="_blank" rel="noreferrer">НИИ МОЗГИ</a><a href="app/">pavelnasuta.github.io/pomokitty</a></div></footer>
+  <footer><div class="wrap footer-inner"><a class="footer-brand" href="#top" aria-label="pomokitty"><img class="footer-brand__mark" src="%BASE_URL%icons/icon-192-v3.png" alt="" /><span>pomokitty</span></a><span>Спокойный таймер фокуса для детей.</span><a href="https://t.me/niimozgii" target="_blank" rel="noreferrer">НИИ МОЗГИ</a><a href="app/">pavelnasuta.github.io/pomokitty</a></div></footer>
 </body>
 </html>
